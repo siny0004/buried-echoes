@@ -1029,16 +1029,17 @@ public class ChunkSVT : MonoBehaviour
         UpdateMesh();
     }
 
-    public void DigSphere(Vector3 worldPosition, float radius, float strength)
+    public bool ApplyDigSphere(
+        Vector3 worldPosition,
+        float radius,
+        float strength)
     {
         if (voxels == null || radius <= 0f || strength <= 0f)
-            return;
+            return false;
 
         Vector3 center = transform.InverseTransformPoint(worldPosition);
-
         float radiusSquared = radius * radius;
 
-        // Calculate the voxel range around the brush.
         int minX = Mathf.Max(0, Mathf.FloorToInt(
             (center.x - radius) / gridcellWidth));
 
@@ -1087,7 +1088,7 @@ public class ChunkSVT : MonoBehaviour
                         oldValue - strength * falloff
                     );
 
-                    if (newValue != oldValue)
+                    if (newValue < oldValue)
                     {
                         voxels[x][y][z] = newValue;
                         changed = true;
@@ -1096,10 +1097,7 @@ public class ChunkSVT : MonoBehaviour
             }
         }
 
-        if (changed)
-        {
-            ConvertVoxelsToSVT();
-        }
+        return changed;
     }
 
     /// <summary>
