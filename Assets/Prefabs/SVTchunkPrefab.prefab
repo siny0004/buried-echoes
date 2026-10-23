@@ -13,7 +13,7 @@ GameObject:
   - component: {fileID: 7326002865322361958}
   - component: {fileID: 7326002865322361957}
   - component: {fileID: 7326002865322361956}
-  m_Layer: 8
+  m_Layer: 3
   m_Name: SVTchunkPrefab
   m_TagString: Untagged
   m_Icon: {fileID: 0}

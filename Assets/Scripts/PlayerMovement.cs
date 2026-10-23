@@ -64,69 +64,102 @@ public class PlayerMovement : MonoBehaviour
         }
     }
 
+    private void OnDrawGizmosSelected()
+    {
+        if (groundCheck == null)
+            return;
+
+        Gizmos.color = isGrounded ? Color.green : Color.red;
+
+        Gizmos.DrawWireSphere(
+            groundCheck.position,
+            groundDistance
+        );
+    }
+
     /// <summary>
     /// Update is called once per frame
     /// </summary>
-    void Update()
+    private void Update()
     {
-        // Update information if character is on the ground
-        isGrounded = Physics.CheckSphere(groundCheck.position, groundDistance, groundMask);
+        // CharacterController reports whether the last
+        // movement touched walkable ground.
+        isGrounded = controller.isGrounded;
 
-        // Set velocity to minimum when character is on the ground
-        if(isGrounded && velocity.y < 0)
+        // Prevent downward velocity from accumulating
+        // while standing on the ground.
+        if (isGrounded && velocity.y < 0f)
         {
             velocity.y = -2f;
         }
 
-        // Moving
+        // Horizontal movement
         float x = Input.GetAxis("Horizontal");
         float z = Input.GetAxis("Vertical");
-        Vector3 move = transform.right * x + transform.forward * z;
-        controller.Move(move * speed * Time.deltaTime);
 
-        // Jump
-        if(Input.GetButtonDown("Jump") && isGrounded)
+        Vector3 move =
+            transform.right * x +
+            transform.forward * z;
+
+        // Jump only if grounded.
+        if (isGrounded && Input.GetKeyDown(KeyCode.Space))
         {
-            velocity.y += Mathf.Sqrt(jumpHeight * -2f * gravity);
+            velocity.y = Mathf.Sqrt(
+                jumpHeight * -2f * gravity
+            );
         }
 
         // Gravity
         velocity.y += gravity * Time.deltaTime;
-        controller.Move(velocity * Time.deltaTime);
 
-        // Checking height - if below world - teleport to point x,10,z
-        if (transform.position.y < -10)
-            transform.position = new Vector3(transform.position.x, 10, transform.position.z);
+        // Combine horizontal and vertical movement
+        // into one CharacterController.Move call.
+        Vector3 movement =
+            move * speed + Vector3.up * velocity.y;
 
-        // Original terrain editing disabled.
+        controller.Move(movement * Time.deltaTime);
+
+        // Temporary fall protection.
+        // TODO: Replace with a proper world-boundary respawn.
+        if (transform.position.y < -10f)
+        {
+            transform.position = new Vector3(
+                transform.position.x,
+                10f,
+                transform.position.z
+            );
+
+            velocity = Vector3.zero;
+        }
+
+        // Original terrain editing remains disabled.
         // DiggingTester handles excavation instead.
 
-        // if (Input.GetKey(KeyCode.Mouse0))
-        // {
-        //     Shoot();
-        // }
-
-        // Changing weapon
+        // Original weapon selection
         if (Input.GetKeyDown(KeyCode.Alpha1))
         {
             weaponIndex = 0;
             Debug.Log("Chosen weapon: " + weaponNames2[0]);
         }
+
         if (Input.GetKeyDown(KeyCode.Alpha2))
         {
             weaponIndex = 1;
             Debug.Log("Chosen weapon: " + weaponNames2[1]);
         }
+
         if (Input.GetKeyDown(KeyCode.Alpha3))
         {
             weaponIndex = 2;
             Debug.Log("Chosen weapon: " + weaponNames2[2]);
         }
+
         if (Input.GetKeyDown(KeyCode.Alpha4))
         {
             weaponIndex = 3;
             Debug.Log("Chosen weapon: " + weaponNames2[3]);
         }
+
         if (Input.GetKeyDown(KeyCode.Alpha5))
         {
             weaponIndex = 4;

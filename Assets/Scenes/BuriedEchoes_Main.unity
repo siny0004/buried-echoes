@@ -1037,12 +1037,12 @@ MonoBehaviour:
   controller: {fileID: 846959654}
   speed: 12
   gravity: -19.62
-  jumpHeight: 6
+  jumpHeight: 4
   groundCheck: {fileID: 1308543700}
   groundDistance: 0.4
   groundMask:
     serializedVersion: 2
-    m_Bits: 0
+    m_Bits: 8
   fpsCam: {fileID: 963194227}
   range: 100000
   weaponIndex: 0
@@ -1337,7 +1337,7 @@ GameObject:
   - component: {fileID: 1014048840}
   - component: {fileID: 1014048839}
   - component: {fileID: 1014048838}
-  m_Layer: 8
+  m_Layer: 0
   m_Name: TEST_SVT2
   m_TagString: Untagged
   m_Icon: {fileID: 0}
