@@ -935,16 +935,35 @@ public class ChunkSVT : MonoBehaviour
     public void CalcNormals()
     {
         normals = new Vector3[vertices.Length];
-        for (int i = 0; i < triangles.Length; i++)
+
+        // Store the combined surface normals for each vertex position.
+        Dictionary<Vector3, Vector3> normalSums = new Dictionary<Vector3, Vector3>();
+
+        // Step 1: Calculate face normals and accumulate them.
+        for (int i = 0; i < vertices.Length; i += 3)
         {
-            Vector3 A = new Vector3(triangles[i].p[1].x - triangles[i].p[0].x, triangles[i].p[1].y - triangles[i].p[0].y, triangles[i].p[1].z - triangles[i].p[0].z);
-            Vector3 B = new Vector3(triangles[i].p[1].x - triangles[i].p[2].x, triangles[i].p[1].y - triangles[i].p[2].y, triangles[i].p[1].z - triangles[i].p[2].z);
-            Vector3 n = new Vector3(A.y * B.z - A.z * B.y, A.z * B.x - A.x * B.z, A.x * B.y - A.y * B.x);
-            n.Normalize();
-            n.Scale(new Vector3(-1,-1,-1));
-            normals[3 * i] = n;
-            normals[3 * i + 1] = n;
-            normals[3 * i + 2] = n;
+            Vector3 p0 = vertices[i];
+            Vector3 p1 = vertices[i + 1];
+            Vector3 p2 = vertices[i + 2];
+
+            // Same orientation as the original CalcNormals() method.
+            Vector3 faceNormal = Vector3.Cross(p1 - p0, p2 - p0);
+
+            // Add the face normal to each triangle vertex position.
+            normalSums.TryGetValue(p0, out Vector3 n0);
+            normalSums[p0] = n0 + faceNormal;
+
+            normalSums.TryGetValue(p1, out Vector3 n1);
+            normalSums[p1] = n1 + faceNormal;
+
+            normalSums.TryGetValue(p2, out Vector3 n2);
+            normalSums[p2] = n2 + faceNormal;
+        }
+
+        // Step 2: Give identical positions the same averaged normal.
+        for (int i = 0; i < vertices.Length; i++)
+        {
+            normals[i] = normalSums[vertices[i]].normalized;
         }
     }
 
