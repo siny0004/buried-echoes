@@ -445,18 +445,45 @@ public class ChunkSVT : MonoBehaviour
                 voxels[i][j] = new float[chunkWidthGC];
         }
 
-        // DEBUG - test filling of voxel terrain (In this place will be calculating terrain with seed and special mathematical noise function(s))
-        for (int i = 0; i < chunkWidthGC; i++)
-            for (int j = 0; j < 24; j++)
-                for (int k = 0; k < chunkWidthGC; k++)
-                {
-                    voxels[i][j][k] = maxVoxelValue;
-                }
-        for (int i = 0; i < chunkWidthGC; i++)
-            for (int k = 0; k < chunkWidthGC; k++)
+        // Generate gently uneven terrain using Perlin noise.
+        float baseHeight = 24f;
+        float noiseScale = 0.035f;
+        float heightVariation = 1.5f;
+
+        for (int x = 0; x < chunkWidthGC; x++)
+        {
+            for (int z = 0; z < chunkWidthGC; z++)
             {
-                voxels[i][24][k] = maxVoxelValue * Mathf.Sin(i) * Mathf.Cos(k);
+                // Use world grid coordinates so neighboring
+                // chunks share a continuous noise pattern.
+                float worldX = xIndex * chunkWidthGC + x;
+                float worldZ = yIndex * chunkWidthGC + z;
+
+                float noise = Mathf.PerlinNoise(
+                    worldX * noiseScale,
+                    worldZ * noiseScale
+                );
+
+                // Perlin noise returns approximately 0 to 1.
+                // Center it around zero to vary terrain height.
+                float surfaceHeight = baseHeight +
+                    (noise - 0.5f) * 2f * heightVariation;
+
+                for (int y = 0; y < chunkHeightGC; y++)
+                {
+                    // Higher density = solid terrain.
+                    // Lower density = empty space.
+                    float density = isolevel +
+                        (surfaceHeight - y) * 128f;
+
+                    voxels[x][y][z] = Mathf.Clamp(
+                        density,
+                        0f,
+                        maxVoxelValue
+                    );
+                }
             }
+        }
 
         // Converts voxels array to SVT
         ConvertVoxelsToSVT();

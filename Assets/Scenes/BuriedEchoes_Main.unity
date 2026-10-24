@@ -287,8 +287,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::DiggingTester
   targetCamera: {fileID: 963194227}
   digRange: 8
-  digRadius: 1.5
-  digStrength: 200
+  digRadius: 1
+  digStrength: 100
   digCooldown: 0.25
 --- !u!4 &328267271
 Transform:
