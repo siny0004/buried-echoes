@@ -379,7 +379,7 @@ public class ChunkSVT : MonoBehaviour
     };
 
     // Chunks const parameters
-    public static readonly int chunkWidthGC = 32;                       // chunk width in gridcells
+    public static readonly int chunkWidthGC = 16;                       // chunk width in gridcells
     public static readonly int chunkHeightGC = 64;                     // chunk height in gridcells
     public static readonly float gridcellWidth = 0.5f;                       // gridcell width
     public static readonly float chunkWidth = chunkWidthGC * gridcellWidth;    // chunk width

@@ -62,15 +62,16 @@ public class SVTterrain : MonoBehaviour
         Vector3 playerWorldLocation = characterRef.transform.position;
         Vector3 terrainWorldLocation = transform.position;
         Vector3 playerRelativeLocation = playerWorldLocation - terrainWorldLocation;
-        Vector2Int playerOnChunkLocation = new Vector2Int((int)(playerRelativeLocation.x / ChunkSVT.gridcellWidth / 16), (int)(playerRelativeLocation.z / ChunkSVT.gridcellWidth / 16));
-        if (playerRelativeLocation.x < 0)
-            playerOnChunkLocation += new Vector2Int(-1, 0);
-        if (playerRelativeLocation.z < 0)
-            playerOnChunkLocation += new Vector2Int(0, -1);
+
+        Vector2Int playerOnChunkLocation = new Vector2Int(
+            Mathf.FloorToInt(playerRelativeLocation.x / ChunkSVT.chunkWidth),
+            Mathf.FloorToInt(playerRelativeLocation.z / ChunkSVT.chunkWidth)
+        );
+
         //Debug.Log(playerOnChunkLocation);
 
         // Check and update chunks if player changed chunk position
-        if(lastChunkPlayerLocationNotInitialized == true || playerOnChunkLocation != lastChunkPlayerLocation)
+        if (lastChunkPlayerLocationNotInitialized == true || playerOnChunkLocation != lastChunkPlayerLocation)
         {
             lastChunkPlayerLocationNotInitialized = false;
             lastChunkPlayerLocation = playerOnChunkLocation;
