@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using Unity.Profiling;
+using UnityEngine.Rendering;
 
 /*
   Indexes of vertices and edges of cube (gridcell)
@@ -362,11 +363,11 @@ public class ChunkSVT : MonoBehaviour
 {0,1,1,2,1,2,2,3,1,2,2,3,2,3,3,2,1,2,2,3,2,3,3,4,2,3,3,4,3,4,4,3,1,2,2,3,2,3,3,4,2,3,3,4,3,4,4,3,2,3,3,2,3,4,4,3,3,4,4,3,4,5,5,2,1,2,2,3,2,3,3,4,2,3,3,4,3,4,4,3,2,3,3,4,3,4,4,5,3,4,4,5,4,5,5,4,2,3,3,4,3,4,2,3,3,4,4,5,4,5,3,2,3,4,4,3,4,5,3,2,4,5,5,4,5,2,4,1,1,2,2,3,2,3,3,4,2,3,3,4,3,4,4,3,2,3,3,4,3,4,4,5,3,2,4,3,4,3,5,2,2,3,3,4,3,4,4,5,3,4,4,5,4,5,5,4,3,4,4,3,4,5,5,4,4,3,5,2,5,4,2,1,2,3,3,4,3,4,4,5,3,4,4,5,2,3,3,2,3,4,4,5,4,5,5,2,4,3,5,4,3,2,4,1,3,4,4,5,4,5,3,4,4,5,5,2,3,4,2,1,2,3,3,2,3,4,2,1,3,2,4,1,2,1,1,0};     // how many triangles has every of all 256 case
 
     // Chunks const parameters
-    public static readonly int chunkWidthGC = 16;                       // chunk width in gridcells
-    public static readonly int chunkHeightGC = 32;                     // chunk height in gridcells
-    public static readonly int gridcellWidth = 1;                       // gridcell width
-    public static readonly int chunkWidth = chunkWidthGC * gridcellWidth;    // chunk width
-    public static readonly int chunkHeight = chunkHeightGC * gridcellWidth;  // chunk height
+    public static readonly int chunkWidthGC = 32;                       // chunk width in gridcells
+    public static readonly int chunkHeightGC = 64;                     // chunk height in gridcells
+    public static readonly float gridcellWidth = 0.5f;                       // gridcell width
+    public static readonly float chunkWidth = chunkWidthGC * gridcellWidth;    // chunk width
+    public static readonly float chunkHeight = chunkHeightGC * gridcellWidth;  // chunk height
     public static readonly float isolevel = 128;                        // isolevel
     public static readonly float maxVoxelValue = 256;                   // maximum voxel value
 
@@ -434,8 +435,12 @@ public class ChunkSVT : MonoBehaviour
 
         // inicjalization mesh object
         mesh = new Mesh();
-        GetComponent<MeshFilter>().mesh = mesh;         // setting mesh for game object
-        
+
+        // Allow meshes with more than 65,535 vertices.
+        mesh.indexFormat = IndexFormat.UInt32;
+
+        GetComponent<MeshFilter>().mesh = mesh;
+
         // initialization of voxels array
         voxels = new float[chunkWidthGC][][];
         for (int i = 0; i < chunkWidthGC; i++)
@@ -445,7 +450,7 @@ public class ChunkSVT : MonoBehaviour
                 voxels[i][j] = new float[chunkWidthGC];
         }
 
-        // Generate gently uneven terrain using Perlin noise.
+        // Gently uneven terrain with 0.5-metre voxel spacing.
         float baseHeight = 24f;
         float noiseScale = 0.035f;
         float heightVariation = 1.5f;
@@ -454,27 +459,28 @@ public class ChunkSVT : MonoBehaviour
         {
             for (int z = 0; z < chunkWidthGC; z++)
             {
-                // Use world grid coordinates so neighboring
-                // chunks share a continuous noise pattern.
-                float worldX = xIndex * chunkWidthGC + x;
-                float worldZ = yIndex * chunkWidthGC + z;
+                // Physical position within the terrain.
+                float worldX = xIndex * chunkWidth +
+                               x * gridcellWidth;
+
+                float worldZ = yIndex * chunkWidth +
+                               z * gridcellWidth;
 
                 float noise = Mathf.PerlinNoise(
                     worldX * noiseScale,
                     worldZ * noiseScale
                 );
 
-                // Perlin noise returns approximately 0 to 1.
-                // Center it around zero to vary terrain height.
                 float surfaceHeight = baseHeight +
                     (noise - 0.5f) * 2f * heightVariation;
 
                 for (int y = 0; y < chunkHeightGC; y++)
                 {
-                    // Higher density = solid terrain.
-                    // Lower density = empty space.
+                    // Convert grid index to metres.
+                    float localY = y * gridcellWidth;
+
                     float density = isolevel +
-                        (surfaceHeight - y) * 128f;
+                        (surfaceHeight - localY) * 128f;
 
                     voxels[x][y][z] = Mathf.Clamp(
                         density,
@@ -915,17 +921,26 @@ public class ChunkSVT : MonoBehaviour
     /// <param name="chunk">chunk</param>
     public void ConvertGridToTriangles()
     {
-        List<Triangle> trianglesL = new List<Triangle>();
-        for (int i = 0; i < grid.Length; i++)
-            for (int j = 0; j < grid[i].Length; j++)
-                for (int k = 0; k < grid[i][j].Length; k++)
+        List<Triangle> trianglesList = new List<Triangle>(4096);
+
+        for (int x = 0; x < grid.Length; x++)
+        {
+            for (int y = 0; y < grid[x].Length; y++)
+            {
+                for (int z = 0; z < grid[x][y].Length; z++)
                 {
-                    Triangle[] trBuf = PolygoniseCube(grid[i][j][k], isolevel); // Calculating triangles for 1 gridcell
-                    for (int l = 0; l < trBuf.Length; l++)
-                        trianglesL.Add(trBuf[l]);
+                    Triangle[] cellTriangles =
+                        PolygoniseCube(grid[x][y][z], isolevel);
+
+                    for (int i = 0; i < cellTriangles.Length; i++)
+                    {
+                        trianglesList.Add(cellTriangles[i]);
+                    }
                 }
-        triangles = new Triangle[trianglesL.Count];
-        trianglesL.CopyTo(triangles);
+            }
+        }
+
+        triangles = trianglesList.ToArray();
     }
 
     /// <summary>
@@ -1023,6 +1038,73 @@ public class ChunkSVT : MonoBehaviour
             );
         }
 
+        using (TrianglesMarker.Auto())
+        {
+            ConvertGridToTriangles();
+        }
+
+        using (VerticesMarker.Auto())
+        {
+            ConvertTrianglesToVertices();
+            CalcIndexesOfVertices();
+        }
+
+        using (NormalsMarker.Auto())
+        {
+            CalcNormals();
+        }
+
+        using (MeshMarker.Auto())
+        {
+            UpdateMesh();
+        }
+    }
+
+    public void RebuildAfterDig(Vector3 worldPosition, float radius)
+    {
+        // Convert the digging position to this chunk's local coordinates.
+        Vector3 center = transform.InverseTransformPoint(worldPosition);
+
+        // Include an extra grid cell because Marching Cubes
+        // uses voxel values from neighboring grid positions.
+        float padding = gridcellWidth;
+
+        int minX = Mathf.Clamp(
+            Mathf.FloorToInt((center.x - radius - padding) / gridcellWidth),
+            0, chunkWidthGC - 1);
+
+        int maxX = Mathf.Clamp(
+            Mathf.CeilToInt((center.x + radius) / gridcellWidth),
+            0, chunkWidthGC - 1);
+
+        int minY = Mathf.Clamp(
+            Mathf.FloorToInt((center.y - radius - padding) / gridcellWidth),
+            0, chunkHeightGC - 1);
+
+        int maxY = Mathf.Clamp(
+            Mathf.CeilToInt((center.y + radius) / gridcellWidth),
+            0, chunkHeightGC - 1);
+
+        int minZ = Mathf.Clamp(
+            Mathf.FloorToInt((center.z - radius - padding) / gridcellWidth),
+            0, chunkWidthGC - 1);
+
+        int maxZ = Mathf.Clamp(
+            Mathf.CeilToInt((center.z + radius) / gridcellWidth),
+            0, chunkWidthGC - 1);
+
+        // Only refresh grid cells around the digging brush.
+        using (GridMarker.Auto())
+        {
+            ConvertVoxelsToGridcells(
+                minX, minY, minZ,
+                maxX - minX + 1,
+                maxY - minY + 1,
+                maxZ - minZ + 1
+            );
+        }
+
+        // For now, still regenerate the complete mesh.
         using (TrianglesMarker.Auto())
         {
             ConvertGridToTriangles();

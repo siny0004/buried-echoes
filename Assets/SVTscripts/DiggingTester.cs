@@ -87,9 +87,10 @@ public class DiggingTester : MonoBehaviour
         }
 
         // Rebuild only after all voxel modifications.
+        // Update grid cells near the brush instead of the entire grid.
         foreach (ChunkSVT chunk in rebuildChunks)
         {
-            chunk.ConvertVoxelsToSVT();
+            chunk.RebuildAfterDig(digPosition, digRadius);
         }
     }
 
