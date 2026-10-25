@@ -362,6 +362,22 @@ public class ChunkSVT : MonoBehaviour
     private static readonly int[/*256*/] triTableLengths =
 {0,1,1,2,1,2,2,3,1,2,2,3,2,3,3,2,1,2,2,3,2,3,3,4,2,3,3,4,3,4,4,3,1,2,2,3,2,3,3,4,2,3,3,4,3,4,4,3,2,3,3,2,3,4,4,3,3,4,4,3,4,5,5,2,1,2,2,3,2,3,3,4,2,3,3,4,3,4,4,3,2,3,3,4,3,4,4,5,3,4,4,5,4,5,5,4,2,3,3,4,3,4,2,3,3,4,4,5,4,5,3,2,3,4,4,3,4,5,3,2,4,5,5,4,5,2,4,1,1,2,2,3,2,3,3,4,2,3,3,4,3,4,4,3,2,3,3,4,3,4,4,5,3,2,4,3,4,3,5,2,2,3,3,4,3,4,4,5,3,4,4,5,4,5,5,4,3,4,4,3,4,5,5,4,4,3,5,2,5,4,2,1,2,3,3,4,3,4,4,5,3,4,4,5,2,3,3,2,3,4,4,5,4,5,5,2,4,3,5,4,3,2,4,1,3,4,4,5,4,5,3,4,4,5,5,2,3,4,2,1,2,3,3,2,3,4,2,1,3,2,4,1,2,1,1,0};     // how many triangles has every of all 256 case
 
+    private static readonly int[,] edgeCorners =
+    {
+    { 0, 1 },
+    { 1, 2 },
+    { 2, 3 },
+    { 3, 0 },
+    { 4, 5 },
+    { 5, 6 },
+    { 6, 7 },
+    { 7, 4 },
+    { 0, 4 },
+    { 1, 5 },
+    { 2, 6 },
+    { 3, 7 }
+    };
+
     // Chunks const parameters
     public static readonly int chunkWidthGC = 32;                       // chunk width in gridcells
     public static readonly int chunkHeightGC = 64;                     // chunk height in gridcells
@@ -383,6 +399,10 @@ public class ChunkSVT : MonoBehaviour
     private Triangle[] triangles;                // all triangles of chunk
     private Vector3[] vertices;                  // all vertices of all triangles of chunk (every 3 continously vertices is 1 triangle)
     private Vector3[] normals;                   // normals of each vertex
+    private readonly List<Vector3> vertexBuffer = new List<Vector3>(4096);
+    private readonly Vector3[] edgeVertices = new Vector3[12];
+    private readonly Dictionary<Vector3, Vector3> normalSums =
+        new Dictionary<Vector3, Vector3>(4096);
     private Vector2[] UV;                        // UV - empty for now
     private int[] verticesIndexes;               // indexes of all vertices (every 3 continously vertices is 1 triangle)
 
@@ -915,6 +935,80 @@ public class ChunkSVT : MonoBehaviour
         }*/
     }
 
+    public void GenerateMeshVertices()
+    {
+        vertexBuffer.Clear();
+
+        for (int x = 0; x < grid.Length; x++)
+        {
+            for (int y = 0; y < grid[x].Length; y++)
+            {
+                for (int z = 0; z < grid[x][y].Length; z++)
+                {
+                    Gridcell cell = grid[x][y][z];
+
+                    int cubeIndex = 0;
+
+                    // Determine which corners are inside the terrain.
+                    for (int corner = 0; corner < 8; corner++)
+                    {
+                        if (cell.val[corner] > isolevel)
+                        {
+                            cubeIndex |= 1 << corner;
+                        }
+                    }
+
+                    int edgeMask = edgeTable[cubeIndex];
+
+                    // No surface intersects this grid cell.
+                    if (edgeMask == 0)
+                        continue;
+
+                    // Calculate intersections on active cube edges.
+                    for (int edge = 0; edge < 12; edge++)
+                    {
+                        if ((edgeMask & (1 << edge)) == 0)
+                            continue;
+
+                        int a = edgeCorners[edge, 0];
+                        int b = edgeCorners[edge, 1];
+
+                        edgeVertices[edge] = VertexInterp(
+                            isolevel,
+                            cell.p[a],
+                            cell.p[b],
+                            cell.val[a],
+                            cell.val[b]
+                        );
+                    }
+
+                    // Add the triangle vertices in the original order.
+                    int triangleCount = triTableLengths[cubeIndex];
+
+                    for (int t = 0; t < triangleCount; t++)
+                    {
+                        int tableIndex = t * 3;
+
+                        vertexBuffer.Add(
+                            edgeVertices[triTable[cubeIndex, tableIndex]]
+                        );
+
+                        vertexBuffer.Add(
+                            edgeVertices[triTable[cubeIndex, tableIndex + 1]]
+                        );
+
+                        vertexBuffer.Add(
+                            edgeVertices[triTable[cubeIndex, tableIndex + 2]]
+                        );
+                    }
+                }
+            }
+        }
+
+        // Convert the reusable list into the mesh vertex array.
+        vertices = vertexBuffer.ToArray();
+    }
+
     /// <summary>
     /// Converts grid into triangles using Marching Cubes algorythm (PolygoniseCube() method)
     /// </summary>
@@ -965,9 +1059,12 @@ public class ChunkSVT : MonoBehaviour
     /// <param name="chunk"></param>
     public void CalcIndexesOfVertices()
     {
-        verticesIndexes = new int[triangles.Length * 3];
-        for (int i = 0; i < triangles.Length * 3; i++)
+        verticesIndexes = new int[vertices.Length];
+
+        for (int i = 0; i < vertices.Length; i++)
+        {
             verticesIndexes[i] = i;
+        }
     }
 
     /// <summary>
@@ -976,22 +1073,23 @@ public class ChunkSVT : MonoBehaviour
     /// <param name="chunk"></param>
     public void CalcNormals()
     {
+        // Reuse the dictionary instead of allocating a new one.
+        normalSums.Clear();
+
         normals = new Vector3[vertices.Length];
 
-        // Store the combined surface normals for each vertex position.
-        Dictionary<Vector3, Vector3> normalSums = new Dictionary<Vector3, Vector3>();
-
-        // Step 1: Calculate face normals and accumulate them.
+        // Accumulate face normals for each vertex position.
         for (int i = 0; i < vertices.Length; i += 3)
         {
             Vector3 p0 = vertices[i];
             Vector3 p1 = vertices[i + 1];
             Vector3 p2 = vertices[i + 2];
 
-            // Same orientation as the original CalcNormals() method.
-            Vector3 faceNormal = Vector3.Cross(p1 - p0, p2 - p0);
+            Vector3 faceNormal = Vector3.Cross(
+                p1 - p0,
+                p2 - p0
+            );
 
-            // Add the face normal to each triangle vertex position.
             normalSums.TryGetValue(p0, out Vector3 n0);
             normalSums[p0] = n0 + faceNormal;
 
@@ -1002,7 +1100,7 @@ public class ChunkSVT : MonoBehaviour
             normalSums[p2] = n2 + faceNormal;
         }
 
-        // Step 2: Give identical positions the same averaged normal.
+        // Assign an averaged normal to each vertex.
         for (int i = 0; i < vertices.Length; i++)
         {
             normals[i] = normalSums[vertices[i]].normalized;
@@ -1040,12 +1138,11 @@ public class ChunkSVT : MonoBehaviour
 
         using (TrianglesMarker.Auto())
         {
-            ConvertGridToTriangles();
+            GenerateMeshVertices();
         }
 
         using (VerticesMarker.Auto())
         {
-            ConvertTrianglesToVertices();
             CalcIndexesOfVertices();
         }
 
@@ -1104,15 +1201,13 @@ public class ChunkSVT : MonoBehaviour
             );
         }
 
-        // For now, still regenerate the complete mesh.
         using (TrianglesMarker.Auto())
         {
-            ConvertGridToTriangles();
+            GenerateMeshVertices();
         }
 
         using (VerticesMarker.Auto())
         {
-            ConvertTrianglesToVertices();
             CalcIndexesOfVertices();
         }
 
@@ -1141,11 +1236,7 @@ public class ChunkSVT : MonoBehaviour
         // converting voxel array to vertices
         ConvertVoxelsToGridcells(x1, y1, z1, xL, yL, zL);
 
-        // polygonising
-        ConvertGridToTriangles();
-
-        // converting triangles to vertices
-        ConvertTrianglesToVertices();
+        GenerateMeshVertices();
 
         // calculating indexes of vertices
         CalcIndexesOfVertices();
