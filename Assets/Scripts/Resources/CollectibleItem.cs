@@ -7,7 +7,7 @@ namespace BuriedEchoes.Resources
     {
         [SerializeField] private ResourceType resourceType = ResourceType.Gold;
         [SerializeField, Min(1)] private int amount = 1;
-
+        public ResourceType ResourceType => resourceType;
         private bool collected;
 
         public bool TryCollect(ResourceInventory inventory)

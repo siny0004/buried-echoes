@@ -37,5 +37,15 @@ namespace BuriedEchoes.Resources
 
             return amount * price;
         }
+
+        public int GetTotalValue(ResourceInventory inventory)
+        {
+            if (inventory == null)
+                return 0;
+
+            return inventory.GetAmount(ResourceType.Copper) * 5
+                 + inventory.GetAmount(ResourceType.Iron) * 12
+                 + inventory.GetAmount(ResourceType.Gold) * 30;
+        }
     }
 }
