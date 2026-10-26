@@ -8,9 +8,7 @@ public class DiggingTester : MonoBehaviour
 
     [Header("Digging Settings")]
     [SerializeField] private float digRange = 5f;
-    [SerializeField] private float digRadius = 1f;
-    [SerializeField] private float digStrength = 160f;
-    [SerializeField] private float digCooldown = 0.25f;
+    private DiggingToolStats toolStats = new();
 
     private float nextDigTime;
 
@@ -23,7 +21,7 @@ public class DiggingTester : MonoBehaviour
             Time.time >= nextDigTime)
         {
             TryDig();
-            nextDigTime = Time.time + digCooldown;
+            nextDigTime = Time.time + toolStats.DigCooldown;
         }
     }
 
@@ -90,7 +88,7 @@ public class DiggingTester : MonoBehaviour
         // Update grid cells near the brush instead of the entire grid.
         foreach (ChunkSVT chunk in rebuildChunks)
         {
-            chunk.RebuildAfterDig(digPosition, digRadius);
+            chunk.RebuildAfterDig(digPosition, toolStats.DigRadius);
         }
     }
 
@@ -106,8 +104,8 @@ public class DiggingTester : MonoBehaviour
 
         if (chunk.ApplyDigSphere(
             digPosition,
-            digRadius,
-            digStrength))
+            toolStats.DigRadius,
+            toolStats.DigStrength))
         {
             changedChunks.Add(chunk);
         }
@@ -125,11 +123,12 @@ public class DiggingTester : MonoBehaviour
     {
         Vector3 local = chunk.transform.InverseTransformPoint(point);
 
-        return local.x + digRadius >= 0f &&
-               local.x - digRadius <= ChunkSVT.chunkWidth &&
-               local.y + digRadius >= 0f &&
-               local.y - digRadius <= ChunkSVT.chunkHeight &&
-               local.z + digRadius >= 0f &&
-               local.z - digRadius <= ChunkSVT.chunkWidth;
+        return local.x + toolStats.DigRadius >= 0f &&
+               local.x - toolStats.DigRadius <= ChunkSVT.chunkWidth &&
+               local.y + toolStats.DigRadius >= 0f &&
+               local.y - toolStats.DigRadius <= ChunkSVT.chunkHeight &&
+               local.z + toolStats.DigRadius >= 0f &&
+               local.z - toolStats.DigRadius <= ChunkSVT.chunkWidth;
     }
+    public DiggingToolStats ToolStats => toolStats;
 }

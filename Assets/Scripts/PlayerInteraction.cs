@@ -7,6 +7,7 @@ public class PlayerInteraction : MonoBehaviour
     [SerializeField] private Camera playerCamera;
     [SerializeField, Min(0.1f)] private float pickupRange = 3f;
     [SerializeField] private InventoryUI inventoryUI;
+    [SerializeField] private DiggingTester diggingTester;
 
     private readonly ResourceInventory inventory = new();
     private readonly PlayerWallet wallet = new();
@@ -19,6 +20,14 @@ public class PlayerInteraction : MonoBehaviour
         if (Input.GetKeyDown(KeyCode.E))
         {
             TryInteract();
+        }
+        // Temporary developer cheat: add money
+        if (Input.GetKeyDown(KeyCode.M))
+        {
+            wallet.AddMoney(10000);
+            inventoryUI?.Refresh(inventory, wallet);
+
+            Debug.Log($"Developer cheat: Balance ${wallet.Balance}");
         }
     }
 
@@ -56,6 +65,19 @@ public class PlayerInteraction : MonoBehaviour
         if (station != null)
         {
             station.Sell(inventory, wallet);
+
+            inventoryUI?.Refresh(inventory, wallet);
+        }
+        // Check whether the player is looking at an upgrade station.
+        UpgradeStation upgradeStation =
+            hit.collider.GetComponentInParent<UpgradeStation>();
+
+        if (upgradeStation != null && diggingTester != null)
+        {
+            upgradeStation.PurchaseShovelUpgrade(
+                wallet,
+                diggingTester.ToolStats
+            );
 
             inventoryUI?.Refresh(inventory, wallet);
         }
