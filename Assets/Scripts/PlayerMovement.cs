@@ -1,6 +1,4 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
+﻿using UnityEngine;
 
 public class PlayerMovement : MonoBehaviour
 {
@@ -18,51 +16,6 @@ public class PlayerMovement : MonoBehaviour
     public float groundDistance = 0.4f;
     public LayerMask groundMask;
     private bool isGrounded;
-
-    // Shooting
-    public Camera fpsCam;
-    public float range = 100000f;
-    public int weaponIndex = 0;
-    public readonly string[] weaponNames2 = { "One voxel -20", "WEAPON NOT CREATED", "WEAPON NOT CREATED", "WEAPON NOT CREATED", "WEAPON NOT CREATED" };
-
-    /// <summary>
-    /// Shooting
-    /// </summary>
-    public void Shoot()
-    {
-        if (weaponIndex == 0)
-        {
-            RaycastHit hit;
-            if (Physics.Raycast(fpsCam.transform.position, fpsCam.transform.forward, out hit, range))
-            {
-                ChunkSVT hitChunk = hit.transform.GetComponent<ChunkSVT>();
-                if (hitChunk != null)
-                {
-                    // IMPROVE  - zawsze jest brany pierwszy chunk !!! ... no i na testy jeszcze dac wyswietlanie sąsiadów postrzelonego chunka
-                    EditSVT.ChangeVoxelValue(-20, hitChunk, hit.point);
-                    /*for(int i = 0; i < 8; i++)
-                    {
-                        if(hitChunk.neighborhood[i] == null)
-                            Debug.Log("i[" + i + "] = NULL");
-                        else
-                            Debug.Log("i[" + i + "] != NULL");
-                    }*/
-                }
-            }
-        }
-        else if (weaponIndex == 1)
-        {
-            RaycastHit hit;
-            if (Physics.Raycast(fpsCam.transform.position, fpsCam.transform.forward, out hit, range))
-            {
-                ChunkSVT hitChunk = hit.transform.GetComponent<ChunkSVT>();
-                if (hitChunk != null)
-                {
-                    EditSVT.ChangeVoxelValue(20, hitChunk, hit.point);
-                }
-            }
-        }
-    }
 
     private void OnDrawGizmosSelected()
     {
@@ -130,40 +83,6 @@ public class PlayerMovement : MonoBehaviour
             );
 
             velocity = Vector3.zero;
-        }
-
-        // Original terrain editing remains disabled.
-        // DiggingTester handles excavation instead.
-
-        // Original weapon selection
-        if (Input.GetKeyDown(KeyCode.Alpha1))
-        {
-            weaponIndex = 0;
-            Debug.Log("Chosen weapon: " + weaponNames2[0]);
-        }
-
-        if (Input.GetKeyDown(KeyCode.Alpha2))
-        {
-            weaponIndex = 1;
-            Debug.Log("Chosen weapon: " + weaponNames2[1]);
-        }
-
-        if (Input.GetKeyDown(KeyCode.Alpha3))
-        {
-            weaponIndex = 2;
-            Debug.Log("Chosen weapon: " + weaponNames2[2]);
-        }
-
-        if (Input.GetKeyDown(KeyCode.Alpha4))
-        {
-            weaponIndex = 3;
-            Debug.Log("Chosen weapon: " + weaponNames2[3]);
-        }
-
-        if (Input.GetKeyDown(KeyCode.Alpha5))
-        {
-            weaponIndex = 4;
-            Debug.Log("Chosen weapon: " + weaponNames2[4]);
         }
     }
 }

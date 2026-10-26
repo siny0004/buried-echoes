@@ -5,10 +5,26 @@ using UnityEngine;
 public class DiggingTester : MonoBehaviour
 {
     [SerializeField] private Camera targetCamera;
+    [Header("Digging Effects")]
+    [SerializeField] private ParticleSystem dirtParticlesPrefab;
+    private ParticleSystem dirtParticlesInstance;
+
+    [Header("Digging Audio")]
+    [SerializeField] private AudioSource shovelAudioSource;
+    [SerializeField] private AudioSource drillAudioSource;
+
+    [SerializeField] private AudioClip[] shovelDigSounds;
+    [SerializeField] private AudioClip drillLoopSound;
+
+    [Header("Tool UI")]
+    [SerializeField] private ToolSelectionUI toolSelectionUI;
 
     [Header("Digging Settings")]
     [SerializeField] private float digRange = 5f;
     private DiggingToolStats toolStats = new();
+    private IDiggingStrategy currentStrategy;
+    private ShovelStrategy shovelStrategy;
+    private DrillStrategy drillStrategy;
 
     private float nextDigTime;
 
@@ -17,11 +33,56 @@ public class DiggingTester : MonoBehaviour
 
     private void Update()
     {
+        // Switch to Shovel
+        if (Input.GetKeyDown(KeyCode.Alpha1))
+        {
+            currentStrategy = shovelStrategy;
+            RefreshToolUI();
+            Debug.Log("Equipped Shovel");
+        }
+
+        // Switch to Drill
+        if (Input.GetKeyDown(KeyCode.Alpha2))
+        {
+            currentStrategy = drillStrategy;
+            RefreshToolUI();
+            Debug.Log("Equipped Drill");
+        }
+
+        // Dig using the currently equipped tool.
         if (Input.GetMouseButton(0) &&
             Time.time >= nextDigTime)
         {
             TryDig();
-            nextDigTime = Time.time + toolStats.DigCooldown;
+            nextDigTime = Time.time + currentStrategy.DigCooldown;
+        }
+        UpdateDrillAudio();
+    }
+
+    private void Awake()
+    {
+        shovelStrategy = new ShovelStrategy(toolStats);
+        drillStrategy = new DrillStrategy();
+
+        // Start with the shovel equipped.
+        currentStrategy = shovelStrategy;
+
+        RefreshToolUI();
+
+        if (dirtParticlesPrefab != null)
+        {
+            dirtParticlesInstance = Instantiate(dirtParticlesPrefab);
+            dirtParticlesInstance.Stop(
+                true,
+                ParticleSystemStopBehavior.StopEmittingAndClear
+            );
+        }
+        if (drillAudioSource != null)
+        {
+            drillAudioSource.clip = drillLoopSound;
+            drillAudioSource.loop = true;
+            drillAudioSource.playOnAwake = false;
+            drillAudioSource.Stop();
         }
     }
 
@@ -88,7 +149,13 @@ public class DiggingTester : MonoBehaviour
         // Update grid cells near the brush instead of the entire grid.
         foreach (ChunkSVT chunk in rebuildChunks)
         {
-            chunk.RebuildAfterDig(digPosition, toolStats.DigRadius);
+            chunk.RebuildAfterDig(digPosition, currentStrategy.DigRadius);
+        }
+        // Play the digging effect only when terrain changes.
+        if (changedChunks.Count > 0)
+        {
+            PlayDigParticles(digPosition);
+            PlayDigSound();
         }
     }
 
@@ -104,8 +171,8 @@ public class DiggingTester : MonoBehaviour
 
         if (chunk.ApplyDigSphere(
             digPosition,
-            toolStats.DigRadius,
-            toolStats.DigStrength))
+            currentStrategy.DigRadius,
+            currentStrategy.DigStrength))
         {
             changedChunks.Add(chunk);
         }
@@ -122,13 +189,83 @@ public class DiggingTester : MonoBehaviour
         Vector3 point)
     {
         Vector3 local = chunk.transform.InverseTransformPoint(point);
+        float radius = currentStrategy.DigRadius;
 
-        return local.x + toolStats.DigRadius >= 0f &&
-               local.x - toolStats.DigRadius <= ChunkSVT.chunkWidth &&
-               local.y + toolStats.DigRadius >= 0f &&
-               local.y - toolStats.DigRadius <= ChunkSVT.chunkHeight &&
-               local.z + toolStats.DigRadius >= 0f &&
-               local.z - toolStats.DigRadius <= ChunkSVT.chunkWidth;
+        return local.x + radius >= 0f &&
+               local.x - radius <= ChunkSVT.chunkWidth &&
+               local.y + radius >= 0f &&
+               local.y - radius <= ChunkSVT.chunkHeight &&
+               local.z + radius >= 0f &&
+               local.z - radius <= ChunkSVT.chunkWidth;
+    }
+    private void PlayDigParticles(Vector3 position)
+    {
+        if (dirtParticlesInstance == null)
+            return;
+
+        dirtParticlesInstance.transform.position = position;
+
+        dirtParticlesInstance.Stop(
+            true,
+            ParticleSystemStopBehavior.StopEmittingAndClear
+        );
+
+        dirtParticlesInstance.Play();
+    }
+    private void PlayDigSound()
+    {
+        // Drill audio is handled continuously in Update().
+        if (currentStrategy == drillStrategy)
+            return;
+
+        if (shovelAudioSource == null ||
+            shovelDigSounds == null ||
+            shovelDigSounds.Length == 0)
+            return;
+
+        AudioClip clip = shovelDigSounds[
+            Random.Range(0, shovelDigSounds.Length)
+        ];
+
+        if (clip == null)
+            return;
+
+        shovelAudioSource.pitch = Random.Range(0.95f, 1.05f);
+        shovelAudioSource.PlayOneShot(clip, 0.65f);
+    }
+    private void UpdateDrillAudio()
+    {
+        if (drillAudioSource == null || drillLoopSound == null)
+            return;
+
+        bool shouldPlay =
+            currentStrategy == drillStrategy &&
+            Input.GetMouseButton(0);
+
+        if (shouldPlay)
+        {
+            if (!drillAudioSource.isPlaying)
+                drillAudioSource.Play();
+        }
+        else if (drillAudioSource.isPlaying)
+        {
+            drillAudioSource.Stop();
+        }
+    }
+    public void RefreshToolUI()
+    {
+        if (toolSelectionUI == null)
+        {
+            Debug.LogWarning("ToolSelectionUI is NOT assigned!");
+            return;
+        }
+
+        Debug.Log("Refreshing Tool UI");
+
+        toolSelectionUI.Refresh(
+            currentStrategy == shovelStrategy,
+            toolStats.ShovelLevel
+        );
     }
     public DiggingToolStats ToolStats => toolStats;
 }

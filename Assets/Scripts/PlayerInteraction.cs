@@ -84,6 +84,7 @@ public class PlayerInteraction : MonoBehaviour
             );
 
             inventoryUI?.Refresh(inventory, wallet);
+            diggingTester.RefreshToolUI();
         }
     }
 
