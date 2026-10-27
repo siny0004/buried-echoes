@@ -19,6 +19,14 @@ public class DiggingTester : MonoBehaviour
     [Header("Tool UI")]
     [SerializeField] private ToolSelectionUI toolSelectionUI;
 
+    [Header("Tool Animation")]
+    [SerializeField] private ToolAnimation shovelAnimation;
+    [SerializeField] private DrillAnimation drillAnimation;
+
+    [Header("Tool Models")]
+    [SerializeField] private GameObject shovelModel;
+    [SerializeField] private GameObject drillModel;
+
     [Header("Digging Settings")]
     [SerializeField] private float digRange = 5f;
     private DiggingToolStats toolStats = new();
@@ -37,6 +45,7 @@ public class DiggingTester : MonoBehaviour
         if (Input.GetKeyDown(KeyCode.Alpha1))
         {
             currentStrategy = shovelStrategy;
+            RefreshToolModels();
             RefreshToolUI();
             Debug.Log("Equipped Shovel");
         }
@@ -45,6 +54,7 @@ public class DiggingTester : MonoBehaviour
         if (Input.GetKeyDown(KeyCode.Alpha2))
         {
             currentStrategy = drillStrategy;
+            RefreshToolModels();
             RefreshToolUI();
             Debug.Log("Equipped Drill");
         }
@@ -56,7 +66,14 @@ public class DiggingTester : MonoBehaviour
             TryDig();
             nextDigTime = Time.time + currentStrategy.DigCooldown;
         }
+
         UpdateDrillAudio();
+
+        bool isDrillingNow =
+            currentStrategy == drillStrategy &&
+            Input.GetMouseButton(0);
+
+        drillAnimation?.SetDrilling(isDrillingNow);
     }
 
     private void Awake()
@@ -67,6 +84,7 @@ public class DiggingTester : MonoBehaviour
         // Start with the shovel equipped.
         currentStrategy = shovelStrategy;
 
+        RefreshToolModels();
         RefreshToolUI();
 
         if (dirtParticlesPrefab != null)
@@ -156,6 +174,11 @@ public class DiggingTester : MonoBehaviour
         {
             PlayDigParticles(digPosition);
             PlayDigSound();
+
+            if (currentStrategy == shovelStrategy)
+            {
+                shovelAnimation?.PlayDigAnimation();
+            }
         }
     }
 
@@ -266,6 +289,16 @@ public class DiggingTester : MonoBehaviour
             currentStrategy == shovelStrategy,
             toolStats.ShovelLevel
         );
+    }
+    private void RefreshToolModels()
+    {
+        bool shovelEquipped = currentStrategy == shovelStrategy;
+
+        if (shovelModel != null)
+            shovelModel.SetActive(shovelEquipped);
+
+        if (drillModel != null)
+            drillModel.SetActive(!shovelEquipped);
     }
     public DiggingToolStats ToolStats => toolStats;
 }
