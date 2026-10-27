@@ -149,17 +149,31 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::BuriedEchoes.Resources.OreSpawner
   resources:
-  - resourceType: 2
-    prefab: {fileID: 233056886979180564, guid: e5ba054926eebaf479eb9ac7492f3137, type: 3}
-    count: 15
   - resourceType: 3
     prefab: {fileID: 233056886979180564, guid: d4048c8acde2c1e43951920813b759dc, type: 3}
-    count: 10
+    largePrefab: {fileID: 233056886979180564, guid: 3e347f9e77d19844cbf549d3f38e1563, type: 3}
+    count: 25
+    depthRange: {x: 2, y: 10}
+    largeChunkChance: 20
+  - resourceType: 2
+    prefab: {fileID: 233056886979180564, guid: e5ba054926eebaf479eb9ac7492f3137, type: 3}
+    largePrefab: {fileID: 233056886979180564, guid: d246be446d3237d449fd8cde5bde9809, type: 3}
+    count: 20
+    depthRange: {x: 8, y: 20}
+    largeChunkChance: 20
+  - resourceType: 5
+    prefab: {fileID: 233056886979180564, guid: 4576c5c4086938846b24b44ab9e21d19, type: 3}
+    largePrefab: {fileID: 233056886979180564, guid: 02565ec9425681549beff583ee77c2d2, type: 3}
+    count: 16
+    depthRange: {x: 18, y: 30}
+    largeChunkChance: 20
   - resourceType: 4
     prefab: {fileID: 233056886979180564, guid: d1ffeca45bb322b4facb3b2d6ab1021f, type: 3}
-    count: 5
+    largePrefab: {fileID: 233056886979180564, guid: f9afe474fb2e8af41bb6c1328b209bdc, type: 3}
+    count: 14
+    depthRange: {x: 28, y: 40}
+    largeChunkChance: 20
   areaSize: {x: 12, y: 12}
-  depthRange: {x: 0.75, y: 2.5}
   rayStartHeight: 50
   maxAttemptsPerNugget: 20
   seed: 12345
@@ -4200,63 +4214,6 @@ PrefabInstance:
     m_AddedGameObjects: []
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 32cb578eef18464488c71abfe79daebb, type: 3}
---- !u!1001 &1757769520281648371
-PrefabInstance:
-  m_ObjectHideFlags: 0
-  serializedVersion: 2
-  m_Modification:
-    serializedVersion: 3
-    m_TransformParent: {fileID: 0}
-    m_Modifications:
-    - target: {fileID: 233056886979180564, guid: d1ffeca45bb322b4facb3b2d6ab1021f, type: 3}
-      propertyPath: m_Name
-      value: GoldNugget
-      objectReference: {fileID: 0}
-    - target: {fileID: 4490324423956805528, guid: d1ffeca45bb322b4facb3b2d6ab1021f, type: 3}
-      propertyPath: m_LocalPosition.x
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 4490324423956805528, guid: d1ffeca45bb322b4facb3b2d6ab1021f, type: 3}
-      propertyPath: m_LocalPosition.y
-      value: 0.51
-      objectReference: {fileID: 0}
-    - target: {fileID: 4490324423956805528, guid: d1ffeca45bb322b4facb3b2d6ab1021f, type: 3}
-      propertyPath: m_LocalPosition.z
-      value: 2.1
-      objectReference: {fileID: 0}
-    - target: {fileID: 4490324423956805528, guid: d1ffeca45bb322b4facb3b2d6ab1021f, type: 3}
-      propertyPath: m_LocalRotation.w
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 4490324423956805528, guid: d1ffeca45bb322b4facb3b2d6ab1021f, type: 3}
-      propertyPath: m_LocalRotation.x
-      value: -0
-      objectReference: {fileID: 0}
-    - target: {fileID: 4490324423956805528, guid: d1ffeca45bb322b4facb3b2d6ab1021f, type: 3}
-      propertyPath: m_LocalRotation.y
-      value: -0
-      objectReference: {fileID: 0}
-    - target: {fileID: 4490324423956805528, guid: d1ffeca45bb322b4facb3b2d6ab1021f, type: 3}
-      propertyPath: m_LocalRotation.z
-      value: -0
-      objectReference: {fileID: 0}
-    - target: {fileID: 4490324423956805528, guid: d1ffeca45bb322b4facb3b2d6ab1021f, type: 3}
-      propertyPath: m_LocalEulerAnglesHint.x
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 4490324423956805528, guid: d1ffeca45bb322b4facb3b2d6ab1021f, type: 3}
-      propertyPath: m_LocalEulerAnglesHint.y
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 4490324423956805528, guid: d1ffeca45bb322b4facb3b2d6ab1021f, type: 3}
-      propertyPath: m_LocalEulerAnglesHint.z
-      value: 0
-      objectReference: {fileID: 0}
-    m_RemovedComponents: []
-    m_RemovedGameObjects: []
-    m_AddedGameObjects: []
-    m_AddedComponents: []
-  m_SourcePrefab: {fileID: 100100000, guid: d1ffeca45bb322b4facb3b2d6ab1021f, type: 3}
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0
@@ -4268,7 +4225,6 @@ SceneRoots:
   - {fileID: 846959655}
   - {fileID: 339674438}
   - {fileID: 328267271}
-  - {fileID: 1757769520281648371}
   - {fileID: 6160157}
   - {fileID: 52124065043194866}
   - {fileID: 596611715}

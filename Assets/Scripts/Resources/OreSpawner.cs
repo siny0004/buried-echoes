@@ -7,22 +7,32 @@ namespace BuriedEchoes.Resources
 {
     public class OreSpawner : MonoBehaviour
     {
+
         [Serializable]
         public class OreSpawnEntry
         {
             public ResourceType resourceType;
-            public GameObject prefab;
 
+            [Header("Prefabs")]
+            public GameObject prefab;
+            public GameObject largePrefab;
+
+            [Header("Spawn Settings")]
             [Min(1)]
             public int count = 10;
+
+            public Vector2 depthRange = new(2f, 8f);
+
+            [Range(0f, 100f)]
+            public float largeChunkChance = 15f;
         }
+
 
         [Header("Resources")]
         [SerializeField] private OreSpawnEntry[] resources;
 
         [Header("Spawn Settings")]
         [SerializeField] private Vector2 areaSize = new(12f, 12f);
-        [SerializeField] private Vector2 depthRange = new(0.75f, 2.5f);
         [SerializeField] private float rayStartHeight = 50f;
         [SerializeField, Min(1)] private int maxAttemptsPerNugget = 20;
 
@@ -113,15 +123,26 @@ namespace BuriedEchoes.Resources
                             continue;
 
                         float depth = RandomBetween(
-                            depthRange.x,
-                            depthRange.y
+                            resource.depthRange.x,
+                            resource.depthRange.y
                         );
 
                         Vector3 position = surfacePoint +
                             Vector3.down * depth;
 
+                        // Determine whether this should be a large chunk.
+                        bool spawnLarge =
+                            resource.largePrefab != null &&
+                            RandomBetween(0f, 100f) < resource.largeChunkChance;
+
+                        // Choose the appropriate prefab.
+                        GameObject prefabToSpawn = spawnLarge
+                            ? resource.largePrefab
+                            : resource.prefab;
+
+                        // Spawn the mineral.
                         Instantiate(
-                            resource.prefab,
+                            prefabToSpawn,
                             position,
                             Quaternion.identity,
                             transform

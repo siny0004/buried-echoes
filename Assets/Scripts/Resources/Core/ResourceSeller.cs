@@ -11,13 +11,16 @@ namespace BuriedEchoes.Resources
             int totalEarned = 0;
 
             totalEarned += SellResource(
-                inventory, ResourceType.Copper, 5);
+                inventory, ResourceType.Copper, 10);
 
             totalEarned += SellResource(
-                inventory, ResourceType.Iron, 12);
+                inventory, ResourceType.Iron, 5);
+            
+            totalEarned += SellResource(
+                inventory, ResourceType.Silver, 20);
 
             totalEarned += SellResource(
-                inventory, ResourceType.Gold, 30);
+                inventory, ResourceType.Gold, 40);
 
             return totalEarned;
         }
@@ -43,9 +46,10 @@ namespace BuriedEchoes.Resources
             if (inventory == null)
                 return 0;
 
-            return inventory.GetAmount(ResourceType.Copper) * 5
-                 + inventory.GetAmount(ResourceType.Iron) * 12
-                 + inventory.GetAmount(ResourceType.Gold) * 30;
+            return inventory.GetAmount(ResourceType.Copper) * 10
+                 + inventory.GetAmount(ResourceType.Iron) * 5
+                 + inventory.GetAmount(ResourceType.Silver) * 20
+                 + inventory.GetAmount(ResourceType.Gold) * 40;
         }
     }
 }

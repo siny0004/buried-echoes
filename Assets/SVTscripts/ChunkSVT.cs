@@ -380,7 +380,7 @@ public class ChunkSVT : MonoBehaviour
 
     // Chunks const parameters
     public static readonly int chunkWidthGC = 16;                       // chunk width in gridcells
-    public static readonly int chunkHeightGC = 64;                     // chunk height in gridcells
+    public static readonly int chunkHeightGC = 144;                     // chunk height in gridcells
     public static readonly float gridcellWidth = 0.5f;                       // gridcell width
     public static readonly float chunkWidth = chunkWidthGC * gridcellWidth;    // chunk width
     public static readonly float chunkHeight = chunkHeightGC * gridcellWidth;  // chunk height
@@ -425,7 +425,8 @@ public class ChunkSVT : MonoBehaviour
     {
         // calculating and setting basic parameters and data of chunk
         sVTterrain = terrain;                   // setting reference to main object of SVT terrain
-        transform.position = terrainWorldLocation + new Vector3(xIndex * chunkWidth, -19f, yIndex * chunkWidth);   // setting location of this chunk in world
+        transform.position = terrainWorldLocation + new Vector3(
+            xIndex * chunkWidth, -59f, yIndex * chunkWidth);   // setting location of this chunk in world
         this.xIndex = xIndex;                   // setting x index of chunk
         this.yIndex = yIndex;                   // setting y index of chunk
         neighborhood = SetAndGetNeighborhood(); // setting neighborhood references
@@ -471,7 +472,7 @@ public class ChunkSVT : MonoBehaviour
         }
 
         // Gently uneven terrain with 0.5-metre voxel spacing.
-        float baseHeight = 24f;
+        float baseHeight = 64f;
         float noiseScale = 0.035f;
         float heightVariation = 1.5f;
 

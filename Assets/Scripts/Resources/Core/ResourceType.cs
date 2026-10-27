@@ -6,6 +6,7 @@
         Stone,
         Copper,
         Iron,
-        Gold
+        Gold,
+        Silver
     }
 }

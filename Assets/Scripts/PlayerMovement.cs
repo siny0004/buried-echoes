@@ -74,7 +74,7 @@ public class PlayerMovement : MonoBehaviour
 
         // Temporary fall protection.
         // TODO: Replace with a proper world-boundary respawn.
-        if (transform.position.y < -10f)
+        if (transform.position.y < -65f)
         {
             transform.position = new Vector3(
                 transform.position.x,

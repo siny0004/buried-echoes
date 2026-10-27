@@ -14,8 +14,9 @@ public class InventoryUI : MonoBehaviour
 
         inventoryText.text =
             "<color=#E6C38D><b>INVENTORY</b></color>\n\n" +
-            $"<color=#B87333>Copper</color>: {inventory.GetAmount(ResourceType.Copper)}\n" +
             $"<color=#A0A5AA>Iron</color>: {inventory.GetAmount(ResourceType.Iron)}\n" +
+            $"<color=#B87333>Copper</color>: {inventory.GetAmount(ResourceType.Copper)}\n" +
+            $"<color=#C0C0C0>Silver</color>: {inventory.GetAmount(ResourceType.Silver)}\n" +
             $"<color=#FFD700>Gold</color>: {inventory.GetAmount(ResourceType.Gold)}\n\n" +
             $"<color=#7EDC87><b>Money: ${wallet.Balance}</b></color>";
     }
