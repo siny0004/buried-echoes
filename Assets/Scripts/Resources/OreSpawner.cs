@@ -141,12 +141,32 @@ namespace BuriedEchoes.Resources
                             : resource.prefab;
 
                         // Spawn the mineral.
-                        Instantiate(
+                        GameObject spawnedOre = Instantiate(
                             prefabToSpawn,
                             position,
                             Quaternion.identity,
                             transform
                         );
+
+                        // Randomize the visible orientation.
+                        spawnedOre.transform.rotation = Quaternion.Euler(
+                            RandomBetween(0f, 360f),
+                            RandomBetween(0f, 360f),
+                            RandomBetween(0f, 360f)
+                        );
+
+                        // Give each procedural rock a unique shape.
+                        ProceduralOreRock[] rocks =
+                            spawnedOre.GetComponentsInChildren<ProceduralOreRock>();
+
+                        foreach (ProceduralOreRock rock in rocks)
+                        {
+                            int rockSeed = Mathf.FloorToInt(
+                                RandomBetween(1f, 1000000f)
+                            );
+
+                            rock.RandomizeShape(rockSeed, 0.15f);
+                        }
 
                         spawned++;
                         break;
