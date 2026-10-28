@@ -10,6 +10,13 @@ public class SVTterrain : MonoBehaviour
 {
     public Transform characterRef;                                  // reference to character
     public GameObject chunkPrefab;                                  // reference to prefab with ChunkSVT script
+    
+    [Header("World Boundaries")]
+    public int minChunkX = -4;
+    public int maxChunkX = 3;
+    public int minChunkZ = -4;
+    public int maxChunkZ = 3;
+
     public List<GameObject> terrainChunks = new List<GameObject>(); // list of all created chunks
     private Vector2Int lastChunkPlayerLocation;                     // last player location described in chunks
     private bool lastChunkPlayerLocationNotInitialized = true;      // is "player location described in chunk" not initialized
@@ -20,23 +27,44 @@ public class SVTterrain : MonoBehaviour
     public void CheckAndCreateChunks(Vector2Int playerOnChunkLocation)
     {
         // Make first chunks within draw distance
-        int xIndex = playerOnChunkLocation.x, yIndex = playerOnChunkLocation.y;
+        int xIndex = playerOnChunkLocation.x;
+        int yIndex = playerOnChunkLocation.y;
+
         for (int x = xIndex - MainScript.DrawDistance; x < xIndex + MainScript.DrawDistance + 1; x++)
+        {
             for (int y = yIndex - MainScript.DrawDistance; y < yIndex + MainScript.DrawDistance + 1; y++)
             {
-                // Check if chunk already exist ...
-                bool chunkExist = false;
-                for (int i = 0; i < terrainChunks.Count; i++)
-                    if ((terrainChunks[i].GetComponent<ChunkSVT>()).xIndex == x && (terrainChunks[i].GetComponent<ChunkSVT>()).yIndex == y)
-                        chunkExist = true;
+                // Skip chunks outside our fixed world boundaries
+                if (x < minChunkX || x > maxChunkX ||
+                    y < minChunkZ || y > maxChunkZ)
+                {
+                    continue;
+                }
 
-                // ... if not, create it
+                // Check if chunk already exists
+                bool chunkExist = false;
+
+                for (int i = 0; i < terrainChunks.Count; i++)
+                {
+                    if (terrainChunks[i].GetComponent<ChunkSVT>().xIndex == x &&
+                        terrainChunks[i].GetComponent<ChunkSVT>().yIndex == y)
+                    {
+                        chunkExist = true;
+                        break;
+                    }
+                }
+
+                // If not, create it
                 if (chunkExist == false)
                 {
-                    terrainChunks.Add((Instantiate(chunkPrefab) as GameObject));
-                    (terrainChunks[terrainChunks.Count-1].GetComponent<ChunkSVT>()).ChunkInit(this, transform.position, x, y);
+                    terrainChunks.Add(Instantiate(chunkPrefab));
+
+                    terrainChunks[terrainChunks.Count - 1]
+                        .GetComponent<ChunkSVT>()
+                        .ChunkInit(this, transform.position, x, y);
                 }
             }
+        }
     }
 
     /// <summary>

@@ -474,7 +474,7 @@ public class ChunkSVT : MonoBehaviour
         // Gently uneven terrain with 0.5-metre voxel spacing.
         float baseHeight = 64f;
         float noiseScale = 0.035f;
-        float heightVariation = 1.5f;
+        float heightVariation = 0.2f;
 
         for (int x = 0; x < chunkWidthGC; x++)
         {
