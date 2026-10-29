@@ -391,6 +391,11 @@ public class ChunkSVT : MonoBehaviour
     public int xIndex;
     public int yIndex;
 
+
+    [Header("Digging Boundaries")]
+    [SerializeField] private float protectedBorder = 1f;
+
+
     // Main data of terrain
     public float[][][] voxels;                   // voxels value in 3D array
 
@@ -1260,6 +1265,22 @@ public class ChunkSVT : MonoBehaviour
         Vector3 center = transform.InverseTransformPoint(worldPosition);
         float radiusSquared = radius * radius;
 
+        // World-space digging boundaries.
+        float minDigX = sVTterrain.transform.position.x +
+            sVTterrain.minChunkX * chunkWidth + protectedBorder;
+
+        float maxDigX = sVTterrain.transform.position.x +
+            (sVTterrain.maxChunkX + 1) * chunkWidth - protectedBorder;
+
+        float minDigZ = sVTterrain.transform.position.z +
+            sVTterrain.minChunkZ * chunkWidth + protectedBorder;
+
+        float maxDigZ = sVTterrain.transform.position.z +
+            (sVTterrain.maxChunkZ + 1) * chunkWidth - protectedBorder;
+
+        // Protect the bottom 2 metres of the voxel terrain.
+        float minDigY = transform.position.y + 2f;
+
         int minX = Mathf.Max(0, Mathf.FloorToInt(
             (center.x - radius) / gridcellWidth));
 
@@ -1284,6 +1305,7 @@ public class ChunkSVT : MonoBehaviour
         {
             for (int y = minY; y <= maxY; y++)
             {
+
                 for (int z = minZ; z <= maxZ; z++)
                 {
                     Vector3 voxelPosition = new Vector3(
@@ -1292,6 +1314,20 @@ public class ChunkSVT : MonoBehaviour
                         z * gridcellWidth
                     );
 
+                    Vector3 voxelWorldPosition =
+                        transform.TransformPoint(voxelPosition);
+
+                    // Protect the outermost layer of dirt.
+                    if (voxelWorldPosition.x < minDigX ||
+                        voxelWorldPosition.x > maxDigX ||
+                        voxelWorldPosition.y < minDigY ||
+                        voxelWorldPosition.z < minDigZ ||
+                        voxelWorldPosition.z > maxDigZ)
+                    {
+                        continue;
+                    }
+
+                    // Existing digging calculations continue here.
                     float distanceSquared =
                         (voxelPosition - center).sqrMagnitude;
 

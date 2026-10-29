@@ -129,5 +129,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   xIndex: 0
   yIndex: 0
+  protectedBorder: 2
   meshCollider: {fileID: 7326002865322361957}
   neighborhood: []

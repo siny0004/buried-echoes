@@ -19,7 +19,6 @@ public class SVTterrain : MonoBehaviour
 
     public List<GameObject> terrainChunks = new List<GameObject>(); // list of all created chunks
     private Vector2Int lastChunkPlayerLocation;                     // last player location described in chunks
-    private bool lastChunkPlayerLocationNotInitialized = true;      // is "player location described in chunk" not initialized
 
     /// <summary>
     /// Always executes when player changes chunk position
