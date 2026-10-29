@@ -72,7 +72,25 @@ public class SVTterrain : MonoBehaviour
     /// </summary>    
     void Start()
     {
-        
+        // Generate the entire fixed digging area at startup.
+        for (int x = minChunkX; x <= maxChunkX; x++)
+        {
+            for (int z = minChunkZ; z <= maxChunkZ; z++)
+            {
+                GameObject newChunk = Instantiate(chunkPrefab);
+
+                terrainChunks.Add(newChunk);
+
+                newChunk.GetComponent<ChunkSVT>().ChunkInit(
+                    this,
+                    transform.position,
+                    x,
+                    z
+                );
+            }
+        }
+
+        Debug.Log($"Generated {terrainChunks.Count} terrain chunks.");
     }
 
     /// <summary>
@@ -80,30 +98,10 @@ public class SVTterrain : MonoBehaviour
     /// </summary>
     void Update()
     {
-        // Chunks Update() method execution
-        for(int i = 0; i < terrainChunks.Count; i++)  // OPTIMIZE - when game will generate 100000 chunks, that loop will executes 100000 times - it should execute on LOADED chunks !!!
+        // Preserve the existing chunk update behavior.
+        for (int i = 0; i < terrainChunks.Count; i++)
         {
-            (terrainChunks[i].GetComponent<ChunkSVT>()).Update();
-        }
-
-        // Calculate player chunk position
-        Vector3 playerWorldLocation = characterRef.transform.position;
-        Vector3 terrainWorldLocation = transform.position;
-        Vector3 playerRelativeLocation = playerWorldLocation - terrainWorldLocation;
-
-        Vector2Int playerOnChunkLocation = new Vector2Int(
-            Mathf.FloorToInt(playerRelativeLocation.x / ChunkSVT.chunkWidth),
-            Mathf.FloorToInt(playerRelativeLocation.z / ChunkSVT.chunkWidth)
-        );
-
-        //Debug.Log(playerOnChunkLocation);
-
-        // Check and update chunks if player changed chunk position
-        if (lastChunkPlayerLocationNotInitialized == true || playerOnChunkLocation != lastChunkPlayerLocation)
-        {
-            lastChunkPlayerLocationNotInitialized = false;
-            lastChunkPlayerLocation = playerOnChunkLocation;
-            CheckAndCreateChunks(playerOnChunkLocation);
+            terrainChunks[i].GetComponent<ChunkSVT>().Update();
         }
     }
 }
