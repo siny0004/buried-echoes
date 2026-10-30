@@ -7,6 +7,7 @@ public class MouseLook : MonoBehaviour
     public float mouseSensitivity = 100f;
     public Transform playerBody;
     float xRotation = 0f;
+    public bool ControlsLocked { get; set; }
 
     /// <summary>
     /// Start is called before the first frame update
@@ -21,6 +22,9 @@ public class MouseLook : MonoBehaviour
     /// </summary>
     void Update()
     {
+        if (ControlsLocked)
+            return;
+
         float mouseX = Input.GetAxis("Mouse X") * mouseSensitivity * Time.deltaTime;
         float mouseY = Input.GetAxis("Mouse Y") * mouseSensitivity * Time.deltaTime;
 

@@ -10,6 +10,7 @@ public class PlayerMovement : MonoBehaviour
     public float gravity = -9.81f;
     public float jumpHeight = 3f;
     private Vector3 velocity;
+    public bool ControlsLocked { get; set; }
 
     // Ground checking (for jumping)
     public Transform groundCheck;
@@ -35,6 +36,9 @@ public class PlayerMovement : MonoBehaviour
     /// </summary>
     private void Update()
     {
+        if (ControlsLocked)
+            return;
+
         // CharacterController reports whether the last
         // movement touched walkable ground.
         isGrounded = controller.isGrounded;

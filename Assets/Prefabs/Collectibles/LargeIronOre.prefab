@@ -67,8 +67,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e2e01624a57a228428d6c474ebad562d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::BuriedEchoes.Resources.CollectibleItem
-  resourceType: 3
-  amount: 2
+  resourceType: 7
+  amount: 1
 --- !u!1 &6252781537472191236
 GameObject:
   m_ObjectHideFlags: 0

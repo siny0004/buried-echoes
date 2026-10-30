@@ -7,6 +7,11 @@
         Copper,
         Iron,
         Gold,
-        Silver
+        Silver,
+
+        LargeCopper,
+        LargeIron,
+        LargeGold,
+        LargeSilver
     }
 }

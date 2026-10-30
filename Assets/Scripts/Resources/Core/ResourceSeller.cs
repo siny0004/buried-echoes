@@ -10,17 +10,17 @@ namespace BuriedEchoes.Resources
 
             int totalEarned = 0;
 
-            totalEarned += SellResource(
-                inventory, ResourceType.Copper, 10);
+            // Regular minerals
+            totalEarned += SellResource(inventory, ResourceType.Copper, 10);
+            totalEarned += SellResource(inventory, ResourceType.Iron, 5);
+            totalEarned += SellResource(inventory, ResourceType.Silver, 20);
+            totalEarned += SellResource(inventory, ResourceType.Gold, 40);
 
-            totalEarned += SellResource(
-                inventory, ResourceType.Iron, 5);
-            
-            totalEarned += SellResource(
-                inventory, ResourceType.Silver, 20);
-
-            totalEarned += SellResource(
-                inventory, ResourceType.Gold, 40);
+            // Large minerals (double value)
+            totalEarned += SellResource(inventory, ResourceType.LargeCopper, 20);
+            totalEarned += SellResource(inventory, ResourceType.LargeIron, 10);
+            totalEarned += SellResource(inventory, ResourceType.LargeSilver, 40);
+            totalEarned += SellResource(inventory, ResourceType.LargeGold, 80);
 
             return totalEarned;
         }
@@ -49,7 +49,11 @@ namespace BuriedEchoes.Resources
             return inventory.GetAmount(ResourceType.Copper) * 10
                  + inventory.GetAmount(ResourceType.Iron) * 5
                  + inventory.GetAmount(ResourceType.Silver) * 20
-                 + inventory.GetAmount(ResourceType.Gold) * 40;
+                 + inventory.GetAmount(ResourceType.Gold) * 40
+                 + inventory.GetAmount(ResourceType.LargeCopper) * 20
+                 + inventory.GetAmount(ResourceType.LargeIron) * 10
+                 + inventory.GetAmount(ResourceType.LargeSilver) * 40
+                 + inventory.GetAmount(ResourceType.LargeGold) * 80;
         }
     }
 }

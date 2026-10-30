@@ -1,6 +1,7 @@
-
 using BuriedEchoes.Resources;
 using UnityEngine;
+using TMPro;
+using UnityEngine.UI;
 
 public class PlayerInteraction : MonoBehaviour
 {
@@ -8,9 +9,28 @@ public class PlayerInteraction : MonoBehaviour
     [SerializeField, Min(0.1f)] private float pickupRange = 3f;
     [SerializeField] private InventoryUI inventoryUI;
     [SerializeField] private DiggingTester diggingTester;
+    [SerializeField] private PlayerMovement playerMovement;
+    [SerializeField] private MouseLook mouseLook;
     [SerializeField] private InteractionUI interactionUI;
-    private readonly ResourceSeller resourceSeller = new();
+    
+    [Header("Upgrade Menu")]
+    [SerializeField] private GameObject upgradePanel;
 
+    [Header("Upgrade UI")]
+    [SerializeField] private Button shovelUpgradeButton;
+    [SerializeField] private Button inventoryUpgradeButton;
+    [SerializeField] private TMP_Text upgradeBalanceText;
+
+    [SerializeField] private TMP_Text shovelNameText;
+    [SerializeField] private TMP_Text shovelLevelText;
+    [SerializeField] private TMP_Text shovelCostText;
+
+    [SerializeField] private TMP_Text inventoryNameText;
+    [SerializeField] private TMP_Text inventoryLevelText;
+    [SerializeField] private TMP_Text inventoryCostText;
+
+    private bool upgradeMenuOpen = false;
+    private readonly ResourceSeller resourceSeller = new();
     private readonly ResourceInventory inventory = new();
     private readonly PlayerWallet wallet = new();
     private void Start()
@@ -20,6 +40,17 @@ public class PlayerInteraction : MonoBehaviour
 
     private void Update()
     {
+        // Handle the upgrade menu while it is open.
+        if (upgradeMenuOpen)
+        {
+            if (Input.GetKeyDown(KeyCode.Escape))
+            {
+                CloseUpgradeMenu();
+            }
+
+            return;
+        }
+
         UpdateInteractionPrompt();
 
         if (Input.GetKeyDown(KeyCode.E))
@@ -56,6 +87,7 @@ public class PlayerInteraction : MonoBehaviour
         {
             if (collectible.TryCollect(inventory))
             {
+                Debug.Log($"Collected resource type: {collectible.ResourceType}");
                 inventoryUI?.Refresh(inventory, wallet);
             }
 
@@ -76,15 +108,187 @@ public class PlayerInteraction : MonoBehaviour
         UpgradeStation upgradeStation =
             hit.collider.GetComponentInParent<UpgradeStation>();
 
-        if (upgradeStation != null && diggingTester != null)
+        if (upgradeStation != null)
         {
-            upgradeStation.PurchaseShovelUpgrade(
-                wallet,
-                diggingTester.ToolStats
-            );
+            OpenUpgradeMenu();
+            return;
+        }
+    }
 
-            inventoryUI?.Refresh(inventory, wallet);
-            diggingTester.RefreshToolUI();
+    private void OpenUpgradeMenu()
+    {
+        if (upgradePanel == null)
+            return;
+
+        upgradeMenuOpen = true;
+        upgradePanel.SetActive(true);
+        RefreshUpgradeUI();
+
+        if (playerMovement != null)
+            playerMovement.ControlsLocked = true;
+        
+        diggingTester?.SetControlsLocked(true);
+
+        if (mouseLook != null)
+            mouseLook.ControlsLocked = true;
+
+        Cursor.lockState = CursorLockMode.None;
+        Cursor.visible = true;
+
+        interactionUI?.Hide();
+    }
+
+    private void CloseUpgradeMenu()
+    {
+        upgradeMenuOpen = false;
+        upgradePanel.SetActive(false);
+
+        if (playerMovement != null)
+            playerMovement.ControlsLocked = false;
+        
+        diggingTester?.SetControlsLocked(false);
+
+        if (mouseLook != null)
+            mouseLook.ControlsLocked = false;
+
+        Cursor.lockState = CursorLockMode.Locked;
+        Cursor.visible = false;
+    }
+
+    public void BuyShovelUpgrade()
+    {
+        if (!upgradeMenuOpen || diggingTester == null)
+            return;
+
+        UpgradeStation station = FindFirstObjectByType<UpgradeStation>();
+
+        if (station == null)
+            return;
+
+        station.PurchaseShovelUpgrade(
+            wallet,
+            diggingTester.ToolStats
+        );
+
+        inventoryUI?.Refresh(inventory, wallet);
+        diggingTester.RefreshToolUI();
+        RefreshUpgradeUI();
+    }
+
+    public void BuyInventoryUpgrade()
+    {
+        if (!upgradeMenuOpen)
+            return;
+
+        UpgradeStation station = FindFirstObjectByType<UpgradeStation>();
+
+        if (station == null)
+            return;
+
+        station.PurchaseInventoryUpgrade(wallet, inventory);
+
+        inventoryUI?.Refresh(inventory, wallet);
+        RefreshUpgradeUI();
+    }
+
+    private void RefreshUpgradeUI()
+    {
+        if (upgradeBalanceText != null)
+            upgradeBalanceText.text = $"Balance: ${wallet.Balance}";
+
+        Color affordableColor = new Color32(70, 120, 70, 255);     // green
+        Color unaffordableColor = new Color32(130, 60, 60, 255);   // red
+        Color maxedColor = new Color32(90, 90, 90, 255);           // gray
+
+        // -----------------------------
+        // Shovel upgrade
+        // -----------------------------
+        if (shovelUpgradeButton != null && diggingTester != null)
+        {
+            DiggingToolStats stats = diggingTester.ToolStats;
+            Image shovelImage = shovelUpgradeButton.GetComponent<Image>();
+
+            if (shovelNameText != null)
+                shovelNameText.text = "UPGRADE SHOVEL";
+
+            if (stats.CanUpgradeShovel)
+            {
+                if (shovelLevelText != null)
+                    shovelLevelText.text =
+                        $"Level {stats.ShovelLevel} → {stats.ShovelLevel + 1}";
+
+                if (shovelCostText != null)
+                    shovelCostText.text = $"Cost: ${stats.NextShovelUpgradeCost}";
+
+                bool canAfford = wallet.Balance >= stats.NextShovelUpgradeCost;
+                shovelUpgradeButton.interactable = canAfford;
+
+                if (shovelImage != null)
+                    shovelImage.color = canAfford ? affordableColor : unaffordableColor;
+            }
+            else
+            {
+                if (shovelLevelText != null)
+                    shovelLevelText.text = "MAX LEVEL";
+
+                if (shovelCostText != null)
+                    shovelCostText.text = "Purchased";
+
+                shovelUpgradeButton.interactable = false;
+
+                if (shovelImage != null)
+                    shovelImage.color = maxedColor;
+            }
+        }
+
+        // -----------------------------
+        // Inventory upgrade
+        // -----------------------------
+        if (inventoryUpgradeButton != null)
+        {
+            Image inventoryImage = inventoryUpgradeButton.GetComponent<Image>();
+
+            if (inventoryNameText != null)
+                inventoryNameText.text = "UPGRADE INVENTORY";
+
+            if (inventory.CanUpgradeInventory)
+            {
+                int nextCapacity = inventory.InventoryLevel switch
+                {
+                    1 => 8,
+                    2 => 12,
+                    3 => 18,
+                    4 => 25,
+                    _ => inventory.Capacity
+                };
+
+                if (inventoryLevelText != null)
+                    inventoryLevelText.text =
+                        $"{inventory.Capacity} → {nextCapacity} slots";
+
+                if (inventoryCostText != null)
+                    inventoryCostText.text =
+                        $"Cost: ${inventory.NextInventoryUpgradeCost}";
+
+                bool canAfford = wallet.Balance >= inventory.NextInventoryUpgradeCost;
+                inventoryUpgradeButton.interactable = canAfford;
+
+                if (inventoryImage != null)
+                    inventoryImage.color = canAfford ? affordableColor : unaffordableColor;
+            }
+            else
+            {
+                if (inventoryLevelText != null)
+                    inventoryLevelText.text = "MAX LEVEL";
+
+                if (inventoryCostText != null)
+                    inventoryCostText.text = "25 slots";
+
+                inventoryUpgradeButton.interactable = false;
+
+                if (inventoryImage != null)
+                    inventoryImage.color = maxedColor;
+            }
         }
     }
 
@@ -140,21 +344,9 @@ public class PlayerInteraction : MonoBehaviour
         UpgradeStation upgradeStation =
             hit.collider.GetComponentInParent<UpgradeStation>();
 
-        if (upgradeStation != null && diggingTester != null)
+        if (upgradeStation != null)
         {
-            DiggingToolStats stats = diggingTester.ToolStats;
-
-            if (!stats.CanUpgradeShovel)
-            {
-                interactionUI.Show("Shovel MAX LEVEL");
-                return;
-            }
-
-            interactionUI.Show(
-                $"[E] Upgrade Shovel Lv. {stats.ShovelLevel} " +
-                $"→ {stats.ShovelLevel + 1} " +
-                $"(${stats.NextShovelUpgradeCost})"
-            );
+            interactionUI.Show("[E] Open Upgrade Station");
             return;
         }
 

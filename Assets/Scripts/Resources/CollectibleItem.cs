@@ -15,8 +15,14 @@ namespace BuriedEchoes.Resources
             if (collected || inventory == null)
                 return false;
 
+            // Try to add the mineral to the inventory.
+            if (!inventory.Add(resourceType, amount))
+            {
+                Debug.Log("Inventory is full! Sell resources to free up space.");
+                return false;
+            }
+
             collected = true;
-            inventory.Add(resourceType, amount);
 
             Debug.Log($"Collected {amount} {resourceType}!");
 

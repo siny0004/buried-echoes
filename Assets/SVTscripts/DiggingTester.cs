@@ -35,12 +35,15 @@ public class DiggingTester : MonoBehaviour
     private DrillStrategy drillStrategy;
 
     private float nextDigTime;
+    public bool ControlsLocked { get; private set; }
 
     private readonly HashSet<ChunkSVT> changedChunks = new();
     private readonly HashSet<ChunkSVT> rebuildChunks = new();
 
     private void Update()
     {
+        if (ControlsLocked)
+            return;
         // Switch to Shovel
         if (Input.GetKeyDown(KeyCode.Alpha1))
         {
@@ -273,6 +276,20 @@ public class DiggingTester : MonoBehaviour
         else if (drillAudioSource.isPlaying)
         {
             drillAudioSource.Stop();
+        }
+    }
+    public void SetControlsLocked(bool locked)
+    {
+        ControlsLocked = locked;
+
+        if (locked)
+        {
+            // Stop drill sound immediately.
+            if (drillAudioSource != null && drillAudioSource.isPlaying)
+                drillAudioSource.Stop();
+
+            // Stop the drill animation.
+            drillAnimation?.SetDrilling(false);
         }
     }
     public void RefreshToolUI()
