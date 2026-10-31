@@ -12,6 +12,11 @@ public class FenceBuilder : MonoBehaviour
     [SerializeField] private float groundHeight = 5f;
     [SerializeField] private float boundaryInset = 0.5f;
 
+    [Header("Shed Entrance")]
+    [SerializeField] private bool createShedEntrance = true;
+    [SerializeField, Min(0f)] private float entranceWidth = 8f;
+    [SerializeField] private float entranceCenterX = 0f;
+
     [ContextMenu("Generate Fence")]
     public void GenerateFence()
     {
@@ -56,13 +61,14 @@ public class FenceBuilder : MonoBehaviour
 
         float worldY = terrainOrigin.y + groundHeight;
 
-        // North and South sides.
+        // South side - leave an opening for the mining shed.
         CreateSide(
             new Vector3(minX, worldY, minZ),
             new Vector3(maxX, worldY, minZ),
-            fenceParent.transform
+            fenceParent.transform,
+            createShedEntrance
         );
-
+        // North side.
         CreateSide(
             new Vector3(minX, worldY, maxZ),
             new Vector3(maxX, worldY, maxZ),
@@ -88,7 +94,8 @@ public class FenceBuilder : MonoBehaviour
     private void CreateSide(
         Vector3 start,
         Vector3 end,
-        Transform parent)
+        Transform parent,
+        bool hasEntrance = false)
     {
         Vector3 direction = end - start;
         float distance = direction.magnitude;
@@ -112,6 +119,22 @@ public class FenceBuilder : MonoBehaviour
         {
             Vector3 position = start +
                 normalizedDirection * ((i + 0.5f) * actualLength);
+
+            // Skip fence sections overlapping the shed entrance.
+            if (hasEntrance)
+            {
+                float sectionMinX = position.x - actualLength * 0.5f;
+                float sectionMaxX = position.x + actualLength * 0.5f;
+
+                float entranceMinX = entranceCenterX - entranceWidth * 0.5f;
+                float entranceMaxX = entranceCenterX + entranceWidth * 0.5f;
+
+                if (sectionMaxX > entranceMinX &&
+                    sectionMinX < entranceMaxX)
+                {
+                    continue;
+                }
+            }
 
             GameObject section = Instantiate(
                 fenceSectionPrefab,
