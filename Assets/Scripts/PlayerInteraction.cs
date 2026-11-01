@@ -16,6 +16,9 @@ public class PlayerInteraction : MonoBehaviour
     [Header("Ore Pickup Audio")]
     [SerializeField] private AudioSource orePickupAudioSource;
 
+    [Header("Selling Audio")]
+    [SerializeField] private AudioSource sellingAudioSource;
+
     [Header("Upgrade Menu")]
     [SerializeField] private GameObject upgradePanel;
 
@@ -114,10 +117,26 @@ public class PlayerInteraction : MonoBehaviour
 
         if (station != null)
         {
-            station.Sell(inventory, wallet);
+            // Check the value before selling empties the inventory.
+            int totalValue = resourceSeller.GetTotalValue(inventory);
+
+            if (totalValue > 0)
+            {
+                station.Sell(inventory, wallet);
+
+                if (sellingAudioSource != null &&
+                    sellingAudioSource.clip != null)
+                {
+                    sellingAudioSource.PlayOneShot(
+                        sellingAudioSource.clip
+                    );
+                }
+            }
 
             inventoryUI?.Refresh(inventory, wallet);
+            return;
         }
+
         // Check whether the player is looking at an upgrade station.
         UpgradeStation upgradeStation =
             hit.collider.GetComponentInParent<UpgradeStation>();

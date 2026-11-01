@@ -6,9 +6,12 @@ public class PlayerMovement : MonoBehaviour
     public CharacterController controller;
 
     // Physics parameters
-    public float speed = 12f;
+    [Header("Movement")]
+    public float walkSpeed = 5f;
+    public float runSpeed = 9f;
+
     public float gravity = -9.81f;
-    public float jumpHeight = 3f;
+    public float jumpHeight = 1.2f;
     private Vector3 velocity;
     public bool ControlsLocked { get; set; }
 
@@ -114,6 +117,12 @@ public class PlayerMovement : MonoBehaviour
             transform.right * x +
             transform.forward * z;
 
+        // Hold Left Shift to sprint.
+        bool isSprinting = Input.GetKey(KeyCode.LeftShift);
+
+        // Use walking speed unless sprinting.
+        float currentSpeed = isSprinting ? runSpeed : walkSpeed;
+
         // Jump only if grounded.
         if (isGrounded && Input.GetKeyDown(KeyCode.Space))
         {
@@ -147,7 +156,7 @@ public class PlayerMovement : MonoBehaviour
         // Combine horizontal and vertical movement
         // into one CharacterController.Move call.
         Vector3 movement =
-            move * speed + Vector3.up * velocity.y;
+            move * currentSpeed + Vector3.up * velocity.y;
 
         controller.Move(movement * Time.deltaTime);
 

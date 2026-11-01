@@ -158,20 +158,28 @@ public class DiggingTester : MonoBehaviour
             }
         }
 
-        // Collect every chunk whose mesh depends on
-        // voxels belonging to a changed chunk.
         foreach (ChunkSVT chunk in changedChunks)
         {
+            // Always rebuild the chunk that was modified.
             rebuildChunks.Add(chunk);
 
             if (chunk.neighborhood == null)
                 continue;
 
-            // These neighbors read border voxel values
-            // from this chunk in ChunkSVT's grid conversion.
-            AddRebuildChunk(chunk.neighborhood[0]);
-            AddRebuildChunk(chunk.neighborhood[1]);
-            AddRebuildChunk(chunk.neighborhood[3]);
+            // Only rebuild neighbors when their shared voxel
+            // boundaries were actually modified.
+
+            // Negative X neighbor
+            if (chunk.ChangedNegativeX)
+                AddRebuildChunk(chunk.neighborhood[3]);
+
+            // Negative Z neighbor
+            if (chunk.ChangedNegativeZ)
+                AddRebuildChunk(chunk.neighborhood[1]);
+
+            // Diagonal negative X/Z neighbor
+            if (chunk.ChangedNegativeCorner)
+                AddRebuildChunk(chunk.neighborhood[0]);
         }
 
         // Rebuild only after all voxel modifications.

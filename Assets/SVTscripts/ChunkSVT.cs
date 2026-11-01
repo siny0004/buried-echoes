@@ -414,6 +414,11 @@ public class ChunkSVT : MonoBehaviour
     // Mesh
     public MeshCollider meshCollider;            // mesh collider object
     private Mesh mesh;                           // mesh object
+    
+    // Tracks which chunk boundaries were modified by the latest dig.
+    public bool ChangedNegativeX { get; private set; }
+    public bool ChangedNegativeZ { get; private set; }
+    public bool ChangedNegativeCorner { get; private set; }
 
     // References
     private SVTterrain sVTterrain;               // reference to main object of SVT terrain
@@ -1263,6 +1268,10 @@ public class ChunkSVT : MonoBehaviour
         float radius,
         float strength)
     {
+        ChangedNegativeX = false;
+        ChangedNegativeZ = false;
+        ChangedNegativeCorner = false;
+
         if (voxels == null || radius <= 0f || strength <= 0f)
             return false;
 
@@ -1352,6 +1361,16 @@ public class ChunkSVT : MonoBehaviour
                     {
                         voxels[x][y][z] = newValue;
                         changed = true;
+
+                        // Track changes to voxels shared with neighboring chunks.
+                        if (x == 0)
+                            ChangedNegativeX = true;
+
+                        if (z == 0)
+                            ChangedNegativeZ = true;
+
+                        if (x == 0 && z == 0)
+                            ChangedNegativeCorner = true;
                     }
                 }
             }
