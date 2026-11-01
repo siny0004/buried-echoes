@@ -59,8 +59,14 @@ Material:
         m_Offset: {x: 0, y: 0}
     m_Ints: []
     m_Floats:
+    - _Metallic: 0.1
+    - _MineralCoverage: 0.55
+    - _MineralScale: 8
     - _QueueControl: 0
     - _QueueOffset: 0
-    m_Colors: []
+    - _Smoothness: 0.15
+    m_Colors:
+    - _MineralColor: {r: 0.7686275, g: 0.47843134, b: 0.25882348, a: 1}
+    - _RockTint: {r: 1, g: 0.98039216, b: 0.98039216, a: 1}
   m_BuildTextureStacks: []
   m_AllowLocking: 1

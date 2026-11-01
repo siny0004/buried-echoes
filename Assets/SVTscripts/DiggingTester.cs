@@ -117,13 +117,21 @@ public class DiggingTester : MonoBehaviour
         );
 
         if (!Physics.Raycast(ray, out RaycastHit hit, digRange))
+        {
+            Debug.Log("DIG FAILED: Raycast hit nothing.");
             return;
+        }
 
         ChunkSVT hitChunk =
             hit.collider.GetComponentInParent<ChunkSVT>();
 
         if (hitChunk == null)
+        {
+            Debug.Log(
+                $"DIG FAILED: Raycast hit {hit.collider.name} instead of terrain."
+            );
             return;
+        }
 
         Vector3 digPosition =
             hit.point - hit.normal * 0.5f;

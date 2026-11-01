@@ -1082,7 +1082,11 @@ public class ChunkSVT : MonoBehaviour
         // Reuse the dictionary instead of allocating a new one.
         normalSums.Clear();
 
-        normals = new Vector3[vertices.Length];
+        // Reuse the existing normal array whenever possible.
+        if (normals == null || normals.Length != vertices.Length)
+        {
+            normals = new Vector3[vertices.Length];
+        }
 
         // Accumulate face normals for each vertex position.
         for (int i = 0; i < vertices.Length; i += 3)

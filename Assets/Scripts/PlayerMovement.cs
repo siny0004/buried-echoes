@@ -12,11 +12,60 @@ public class PlayerMovement : MonoBehaviour
     private Vector3 velocity;
     public bool ControlsLocked { get; set; }
 
+    // Rope ascender
+    [Header("Rope Ascender")]
+    public KeyCode ropeKey = KeyCode.T;
+
+    [SerializeField] private int ropeLevel = 1;
+
+    private readonly float[] ropeSpeeds =
+    {
+        3f, 5f, 7f, 9f, 12f
+    };
+
+    private readonly int[] ropeUpgradeCosts =
+    {
+        50, 100, 250, 500
+    };
+
+    public int RopeLevel => ropeLevel;
+
+    public int MaxRopeLevel => ropeSpeeds.Length;
+
+    public float RopeSpeed => ropeSpeeds[
+        Mathf.Clamp(ropeLevel - 1, 0, ropeSpeeds.Length - 1)
+    ];
+
+    [Header("Rope Audio")]
+    [SerializeField] private AudioSource ropeAudioSource;
+
     // Ground checking (for jumping)
     public Transform groundCheck;
     public float groundDistance = 0.4f;
     public LayerMask groundMask;
     private bool isGrounded;
+
+    public bool CanUpgradeRope()
+    {
+        return ropeLevel < MaxRopeLevel;
+    }
+
+    public int GetRopeUpgradeCost()
+    {
+        if (!CanUpgradeRope())
+            return 0;
+
+        return ropeUpgradeCosts[ropeLevel - 1];
+    }
+
+    public bool UpgradeRope()
+    {
+        if (!CanUpgradeRope())
+            return false;
+
+        ropeLevel++;
+        return true;
+    }
 
     private void OnDrawGizmosSelected()
     {
@@ -37,7 +86,14 @@ public class PlayerMovement : MonoBehaviour
     private void Update()
     {
         if (ControlsLocked)
+        {
+            if (ropeAudioSource != null && ropeAudioSource.isPlaying)
+            {
+                ropeAudioSource.Stop();
+            }
+
             return;
+        }
 
         // CharacterController reports whether the last
         // movement touched walkable ground.
@@ -66,8 +122,27 @@ public class PlayerMovement : MonoBehaviour
             );
         }
 
-        // Gravity
-        velocity.y += gravity * Time.deltaTime;
+        // Rope ascender
+        if (Input.GetKey(ropeKey))
+        {
+            velocity.y = RopeSpeed;
+
+            // Start the rope sound when ascending.
+            if (ropeAudioSource != null && !ropeAudioSource.isPlaying)
+            {
+                ropeAudioSource.Play();
+            }
+        }
+        else
+        {
+            velocity.y += gravity * Time.deltaTime;
+
+            // Stop the rope sound when T is released.
+            if (ropeAudioSource != null && ropeAudioSource.isPlaying)
+            {
+                ropeAudioSource.Stop();
+            }
+        }
 
         // Combine horizontal and vertical movement
         // into one CharacterController.Move call.

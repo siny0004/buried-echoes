@@ -7,7 +7,7 @@ namespace BuriedEchoes.Resources
     {
         private readonly Dictionary<ResourceType, int> resources = new();
         private static readonly int[] capacities = { 5, 8, 12, 18, 25 };
-        private static readonly int[] upgradeCosts = { 100, 300, 750, 1500 };
+        private static readonly int[] upgradeCosts = { 50, 100, 250, 500 };
 
         public int InventoryLevel { get; private set; } = 1;
 

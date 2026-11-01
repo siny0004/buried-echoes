@@ -12,13 +12,17 @@ public class PlayerInteraction : MonoBehaviour
     [SerializeField] private PlayerMovement playerMovement;
     [SerializeField] private MouseLook mouseLook;
     [SerializeField] private InteractionUI interactionUI;
-    
+
+    [Header("Ore Pickup Audio")]
+    [SerializeField] private AudioSource orePickupAudioSource;
+
     [Header("Upgrade Menu")]
     [SerializeField] private GameObject upgradePanel;
 
     [Header("Upgrade UI")]
     [SerializeField] private Button shovelUpgradeButton;
     [SerializeField] private Button inventoryUpgradeButton;
+    [SerializeField] private Button ropeUpgradeButton;
     [SerializeField] private TMP_Text upgradeBalanceText;
 
     [SerializeField] private TMP_Text shovelNameText;
@@ -28,6 +32,10 @@ public class PlayerInteraction : MonoBehaviour
     [SerializeField] private TMP_Text inventoryNameText;
     [SerializeField] private TMP_Text inventoryLevelText;
     [SerializeField] private TMP_Text inventoryCostText;
+
+    [SerializeField] private TMP_Text ropeNameText;
+    [SerializeField] private TMP_Text ropeLevelText;
+    [SerializeField] private TMP_Text ropeCostText;
 
     private bool upgradeMenuOpen = false;
     private readonly ResourceSeller resourceSeller = new();
@@ -88,9 +96,15 @@ public class PlayerInteraction : MonoBehaviour
             if (collectible.TryCollect(inventory))
             {
                 Debug.Log($"Collected resource type: {collectible.ResourceType}");
+
+                // Play pickup sound only when collection succeeds.
+                if (orePickupAudioSource != null)
+                {
+                    orePickupAudioSource.PlayOneShot(orePickupAudioSource.clip);
+                }
+
                 inventoryUI?.Refresh(inventory, wallet);
             }
-
             return;
         }
 
@@ -186,6 +200,23 @@ public class PlayerInteraction : MonoBehaviour
             return;
 
         station.PurchaseInventoryUpgrade(wallet, inventory);
+
+        inventoryUI?.Refresh(inventory, wallet);
+        RefreshUpgradeUI();
+    }
+
+    public void BuyRopeUpgrade()
+    {
+        if (!upgradeMenuOpen || playerMovement == null)
+            return;
+
+        UpgradeStation station =
+            FindFirstObjectByType<UpgradeStation>();
+
+        if (station == null)
+            return;
+
+        station.PurchaseRopeUpgrade(wallet, playerMovement);
 
         inventoryUI?.Refresh(inventory, wallet);
         RefreshUpgradeUI();
@@ -290,6 +321,49 @@ public class PlayerInteraction : MonoBehaviour
                     inventoryImage.color = maxedColor;
             }
         }
+
+        // -----------------------------
+        // Rope upgrade
+        // -----------------------------
+        if (ropeUpgradeButton != null && playerMovement != null)
+        {
+            Image ropeImage = ropeUpgradeButton.GetComponent<Image>();
+
+            if (ropeNameText != null)
+                ropeNameText.text = "UPGRADE ROPE";
+
+            if (playerMovement.CanUpgradeRope())
+            {
+                if (ropeLevelText != null)
+                    ropeLevelText.text =
+                        $"Level {playerMovement.RopeLevel} → {playerMovement.RopeLevel + 1}";
+
+                int cost = playerMovement.GetRopeUpgradeCost();
+
+                if (ropeCostText != null)
+                    ropeCostText.text = $"Cost: ${cost}";
+
+                bool canAfford = wallet.Balance >= cost;
+                ropeUpgradeButton.interactable = canAfford;
+
+                if (ropeImage != null)
+                    ropeImage.color =
+                        canAfford ? affordableColor : unaffordableColor;
+            }
+            else
+            {
+                if (ropeLevelText != null)
+                    ropeLevelText.text = "MAX LEVEL";
+
+                if (ropeCostText != null)
+                    ropeCostText.text = "12 m/s";
+
+                ropeUpgradeButton.interactable = false;
+
+                if (ropeImage != null)
+                    ropeImage.color = maxedColor;
+            }
+        }
     }
 
     private void UpdateInteractionPrompt()
@@ -320,9 +394,17 @@ public class PlayerInteraction : MonoBehaviour
 
         if (collectible != null)
         {
-            interactionUI.Show(
-                $"[E] Collect {collectible.ResourceType}"
-            );
+            if (inventory.IsFull)
+            {
+                interactionUI.Show("INVENTORY FULL", Color.red);
+            }
+            else
+            {
+                interactionUI.Show(
+                    $"[E] Collect {collectible.ResourceType}"
+                );
+            }
+
             return;
         }
 

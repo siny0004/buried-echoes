@@ -89,4 +89,46 @@ public class UpgradeStation : MonoBehaviour
             wallet.AddMoney(cost);
         }
     }
+
+    public void PurchaseRopeUpgrade(
+    PlayerWallet wallet,
+    PlayerMovement playerMovement)
+    {
+        if (wallet == null || playerMovement == null)
+            return;
+
+        if (!playerMovement.CanUpgradeRope())
+        {
+            Debug.Log("Rope is already at maximum level!");
+            return;
+        }
+
+        int cost = playerMovement.GetRopeUpgradeCost();
+
+        if (wallet.Balance < cost)
+        {
+            Debug.Log(
+                $"Not enough money! Rope upgrade costs ${cost}. " +
+                $"Current balance: ${wallet.Balance}"
+            );
+            return;
+        }
+
+        if (!wallet.TrySpend(cost))
+            return;
+
+        if (playerMovement.UpgradeRope())
+        {
+            Debug.Log(
+                $"Rope upgraded to level {playerMovement.RopeLevel}! " +
+                $"New ascent speed: {playerMovement.RopeSpeed} m/s. " +
+                $"Remaining money: ${wallet.Balance}"
+            );
+        }
+        else
+        {
+            // Refund if the upgrade unexpectedly fails.
+            wallet.AddMoney(cost);
+        }
+    }
 }
