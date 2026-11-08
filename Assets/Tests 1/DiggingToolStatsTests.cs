@@ -56,10 +56,10 @@ public class DiggingToolStatsTests
         Assert.AreEqual(100, stats.NextShovelUpgradeCost);
 
         stats.TryUpgradeShovel();
-        Assert.AreEqual(200, stats.NextShovelUpgradeCost);
+        Assert.AreEqual(250, stats.NextShovelUpgradeCost);
 
         stats.TryUpgradeShovel();
-        Assert.AreEqual(400, stats.NextShovelUpgradeCost);
+        Assert.AreEqual(500, stats.NextShovelUpgradeCost);
 
         stats.TryUpgradeShovel();
         Assert.AreEqual(0, stats.NextShovelUpgradeCost);

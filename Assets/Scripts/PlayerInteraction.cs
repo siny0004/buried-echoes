@@ -12,6 +12,7 @@ public class PlayerInteraction : MonoBehaviour
     [SerializeField] private PlayerMovement playerMovement;
     [SerializeField] private MouseLook mouseLook;
     [SerializeField] private InteractionUI interactionUI;
+    [SerializeField] private UpgradeStation upgradeStation;
 
     [Header("Ore Pickup Audio")]
     [SerializeField] private AudioSource orePickupAudioSource;
@@ -98,8 +99,6 @@ public class PlayerInteraction : MonoBehaviour
         {
             if (collectible.TryCollect(inventory))
             {
-                Debug.Log($"Collected resource type: {collectible.ResourceType}");
-
                 // Play pickup sound only when collection succeeds.
                 if (orePickupAudioSource != null)
                 {
@@ -193,12 +192,10 @@ public class PlayerInteraction : MonoBehaviour
         if (!upgradeMenuOpen || diggingTester == null)
             return;
 
-        UpgradeStation station = FindFirstObjectByType<UpgradeStation>();
-
-        if (station == null)
+        if (upgradeStation == null)
             return;
 
-        station.PurchaseShovelUpgrade(
+        upgradeStation.PurchaseShovelUpgrade(
             wallet,
             diggingTester.ToolStats
         );
@@ -213,12 +210,10 @@ public class PlayerInteraction : MonoBehaviour
         if (!upgradeMenuOpen)
             return;
 
-        UpgradeStation station = FindFirstObjectByType<UpgradeStation>();
-
-        if (station == null)
+        if (upgradeStation == null)
             return;
 
-        station.PurchaseInventoryUpgrade(wallet, inventory);
+        upgradeStation.PurchaseInventoryUpgrade(wallet, inventory);
 
         inventoryUI?.Refresh(inventory, wallet);
         RefreshUpgradeUI();
@@ -229,13 +224,10 @@ public class PlayerInteraction : MonoBehaviour
         if (!upgradeMenuOpen || playerMovement == null)
             return;
 
-        UpgradeStation station =
-            FindFirstObjectByType<UpgradeStation>();
-
-        if (station == null)
+        if (upgradeStation == null)
             return;
 
-        station.PurchaseRopeUpgrade(wallet, playerMovement);
+        upgradeStation.PurchaseRopeUpgrade(wallet, playerMovement);
 
         inventoryUI?.Refresh(inventory, wallet);
         RefreshUpgradeUI();

@@ -1,7 +1,5 @@
-
 using NUnit.Framework;
 using BuriedEchoes.Resources;
-using ResourceType = BuriedEchoes.Resources.ResourceType;
 
 public class ResourceSellerTests
 {
@@ -11,14 +9,14 @@ public class ResourceSellerTests
         ResourceInventory inventory = new ResourceInventory();
         ResourceSeller seller = new ResourceSeller();
 
-        inventory.Add(ResourceType.Copper, 5);
-        inventory.Add(ResourceType.Iron, 3);
+        inventory.Add(ResourceType.Copper, 2);
+        inventory.Add(ResourceType.Iron, 1);
         inventory.Add(ResourceType.Gold, 2);
 
-        // 5*5 + 3*12 + 2*30 = 121
+        // 2*10 + 1*5 + 2*40 = 105
         int total = seller.GetTotalValue(inventory);
 
-        Assert.AreEqual(121, total);
+        Assert.AreEqual(105, total);
     }
 
     [Test]
@@ -27,11 +25,11 @@ public class ResourceSellerTests
         ResourceInventory inventory = new ResourceInventory();
         ResourceSeller seller = new ResourceSeller();
 
-        inventory.Add(ResourceType.Copper, 10);
+        inventory.Add(ResourceType.Copper, 5);
 
         seller.GetTotalValue(inventory);
 
-        Assert.AreEqual(10, inventory.GetAmount(ResourceType.Copper));
+        Assert.AreEqual(5, inventory.GetAmount(ResourceType.Copper));
     }
 
     [Test]
@@ -40,13 +38,13 @@ public class ResourceSellerTests
         ResourceInventory inventory = new ResourceInventory();
         ResourceSeller seller = new ResourceSeller();
 
-        inventory.Add(ResourceType.Copper, 5);
-        inventory.Add(ResourceType.Iron, 3);
+        inventory.Add(ResourceType.Copper, 2);
+        inventory.Add(ResourceType.Iron, 1);
         inventory.Add(ResourceType.Gold, 2);
 
         int earned = seller.SellAll(inventory);
 
-        Assert.AreEqual(121, earned);
+        Assert.AreEqual(105, earned);
     }
 
     [Test]
@@ -55,8 +53,8 @@ public class ResourceSellerTests
         ResourceInventory inventory = new ResourceInventory();
         ResourceSeller seller = new ResourceSeller();
 
-        inventory.Add(ResourceType.Copper, 5);
-        inventory.Add(ResourceType.Iron, 3);
+        inventory.Add(ResourceType.Copper, 2);
+        inventory.Add(ResourceType.Iron, 1);
         inventory.Add(ResourceType.Gold, 2);
 
         seller.SellAll(inventory);
@@ -88,7 +86,7 @@ public class ResourceSellerTests
         int firstSale = seller.SellAll(inventory);
         int secondSale = seller.SellAll(inventory);
 
-        Assert.AreEqual(60, firstSale);
+        Assert.AreEqual(80, firstSale);
         Assert.AreEqual(0, secondSale);
     }
 

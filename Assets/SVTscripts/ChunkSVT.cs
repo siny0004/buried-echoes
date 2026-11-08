@@ -848,102 +848,6 @@ public class ChunkSVT : MonoBehaviour
                 }
             }
         }
-
-
-        /////////////////////////////////////
-        /*for (int x = x1; x < x1 + xL; x++)
-        {
-            for (int y = y1; y < y1 + yL; y++)
-            {
-                for (int z = z1; z < z1 + zL; z++)
-                {
-                    // 0 - gricell vertex number
-                    grid[x][y][z].val[0] = voxels[x][y][z];
-
-                    // 1
-                    if (x > 0)
-                        grid[x - 1][y][z].val[1] = voxels[x][y][z];
-                    else
-                    {
-                        if (neighborhood[3] != null)
-                            neighborhood[3].grid[15][y][z].val[1] = voxels[x][y][z];
-                    }
-
-                    // 2
-                    if (x > 0 && z > 0)
-                        grid[x - 1][y][z - 1].val[2] = voxels[x][y][z];
-                    else if (x > 0)
-                    {
-                        if (neighborhood[1] != null)
-                            neighborhood[1].grid[x - 1][y][15].val[2] = voxels[x][y][z];
-                    }
-                    else if (z > 0)
-                    {
-                        if (neighborhood[3] != null)
-                            neighborhood[3].grid[15][y][z - 1].val[2] = voxels[x][y][z];
-                    }
-                    else
-                    {
-                        if (neighborhood[0] != null)
-                            neighborhood[0].grid[15][y][15].val[2] = voxels[x][y][z];
-                    }
-
-                    // 3
-                    if (z > 0)
-                        grid[x][y][z - 1].val[3] = voxels[x][y][z];
-                    else
-                    {
-                        if (neighborhood[1] != null)
-                            neighborhood[1].grid[x][y][15].val[3] = voxels[x][y][z];
-                    }
-
-                    // 4, 5, 6, 7
-                    if (y > 0 && y < chunkHeightGC)
-                    {
-                        // 4
-                        grid[x][y - 1][z].val[4] = voxels[x][y][z];
-
-                        // 5
-                        if (x > 0)
-                            grid[x - 1][y - 1][z].val[5] = voxels[x][y][z];
-                        else
-                        {
-                            if (neighborhood[3] != null)
-                                neighborhood[3].grid[15][y - 1][z].val[5] = voxels[x][y][z];
-                        }
-
-                        // 6
-                        if (x > 0 && z > 0)
-                            grid[x - 1][y - 1][z - 1].val[6] = voxels[x][y][z];
-                        else if (x > 0)
-                        {
-                            if (neighborhood[1] != null)
-                                neighborhood[1].grid[x - 1][y - 1][15].val[6] = voxels[x][y][z];
-                        }
-                        else if (z > 0)
-                        {
-                            if (neighborhood[3] != null)
-                                neighborhood[3].grid[15][y - 1][z - 1].val[6] = voxels[x][y][z];
-                        }
-                        else
-                        {
-                            if (neighborhood[0] != null)
-                                neighborhood[0].grid[15][y - 1][15].val[6] = voxels[x][y][z];
-                        }
-
-                        // 7
-                        if (z > 0)
-                            grid[x][y - 1][z - 1].val[7] = voxels[x][y][z];
-                        else
-                        {
-                            if (neighborhood[1] != null)
-                                neighborhood[1].grid[x][y - 1][15].val[7] = voxels[x][y][z];
-                        }
-                    }
-                    // else: gridcell below or above chunk - do nothing ...
-                }
-            }
-        }*/
     }
 
     public void GenerateMeshVertices()
@@ -1377,21 +1281,5 @@ public class ChunkSVT : MonoBehaviour
         }
 
         return changed;
-    }
-
-    /// <summary>
-    /// Start is called before the first frame update
-    /// </summary> 
-    public void Start()
-    {
-        
-    }
-
-    /// <summary>
-    /// Update is called once per frame
-    /// </summary>
-    public void Update()
-    {
-        
     }
 }

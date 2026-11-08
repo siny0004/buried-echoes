@@ -40,6 +40,7 @@ namespace BuriedEchoes.Resources
         [SerializeField] private int seed = 12345;
 
         private System.Random random;
+        private readonly RaycastHit[] raycastHits = new RaycastHit[64];
 
         private IEnumerator Start()
         {
@@ -92,9 +93,10 @@ namespace BuriedEchoes.Resources
                             z
                         );
 
-                        RaycastHit[] hits = Physics.RaycastAll(
+                        int hitCount = Physics.RaycastNonAlloc(
                             rayOrigin,
                             Vector3.down,
+                            raycastHits,
                             rayStartHeight * 2f,
                             ~0,
                             QueryTriggerInteraction.Ignore
@@ -104,11 +106,12 @@ namespace BuriedEchoes.Resources
                         bool foundTerrain = false;
                         Vector3 surfacePoint = default;
 
-                        foreach (RaycastHit hit in hits)
+                        for (int hitIndex = 0; hitIndex < hitCount; hitIndex++)
                         {
+                            RaycastHit hit = raycastHits[hitIndex];
+
                             // Ignore player and other objects.
-                            if (hit.collider.GetComponentInParent<ChunkSVT>()
-                                == null)
+                            if (hit.collider.GetComponentInParent<ChunkSVT>() == null)
                                 continue;
 
                             if (hit.distance < nearestDistance)

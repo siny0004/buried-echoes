@@ -91,16 +91,4 @@ public class SVTterrain : MonoBehaviour
 
         Debug.Log($"Generated {terrainChunks.Count} terrain chunks.");
     }
-
-    /// <summary>
-    /// Update is called once per frame
-    /// </summary>
-    void Update()
-    {
-        // Preserve the existing chunk update behavior.
-        for (int i = 0; i < terrainChunks.Count; i++)
-        {
-            terrainChunks[i].GetComponent<ChunkSVT>().Update();
-        }
-    }
 }

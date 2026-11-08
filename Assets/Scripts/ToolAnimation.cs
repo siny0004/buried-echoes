@@ -87,4 +87,16 @@ public class ToolAnimation : MonoBehaviour
 
         animationCoroutine = null;
     }
+
+    private void OnDisable()
+    {
+        if (animationCoroutine != null)
+        {
+            StopCoroutine(animationCoroutine);
+            animationCoroutine = null;
+        }
+
+        transform.localPosition = restPosition;
+        transform.localRotation = restRotation;
+    }
 }

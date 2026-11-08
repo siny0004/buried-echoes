@@ -10,14 +10,21 @@ public class InteractionUI : MonoBehaviour
         if (interactionText == null)
             return;
 
-        interactionText.text = message;
-        interactionText.color = color ?? Color.white;
-        interactionText.enabled = true;
+        if (interactionText.text != message)
+            interactionText.text = message;
+
+        Color targetColor = color ?? Color.white;
+
+        if (interactionText.color != targetColor)
+            interactionText.color = targetColor;
+
+        if (!interactionText.enabled)
+            interactionText.enabled = true;
     }
 
     public void Hide()
     {
-        if (interactionText == null)
+        if (interactionText == null || !interactionText.enabled)
             return;
 
         interactionText.enabled = false;

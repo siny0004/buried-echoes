@@ -54,4 +54,12 @@ public class DrillAnimation : MonoBehaviour
                 restRotation * Quaternion.Euler(wave * bobRotationAmount, 0f, 0f);
         }
     }
+
+    private void OnDisable()
+    {
+        isDrilling = false;
+
+        transform.localPosition = restPosition;
+        transform.localRotation = restRotation;
+    }
 }

@@ -15781,6 +15781,7 @@ MonoBehaviour:
   playerMovement: {fileID: 846959656}
   mouseLook: {fileID: 963194229}
   interactionUI: {fileID: 1089774559}
+  upgradeStation: {fileID: 494947139}
   orePickupAudioSource: {fileID: 1357267458}
   sellingAudioSource: {fileID: 1555673325}
   upgradePanel: {fileID: 1862469221}

@@ -235,13 +235,21 @@ public class ProceduralOreRock : MonoBehaviour
             int bc = GetMidpoint(b, c);
             int ca = GetMidpoint(c, a);
 
-            newTriangles.AddRange(new[]
-            {
-                a, ab, ca,
-                b, bc, ab,
-                c, ca, bc,
-                ab, bc, ca
-            });
+            newTriangles.Add(a);
+            newTriangles.Add(ab);
+            newTriangles.Add(ca);
+
+            newTriangles.Add(b);
+            newTriangles.Add(bc);
+            newTriangles.Add(ab);
+
+            newTriangles.Add(c);
+            newTriangles.Add(ca);
+            newTriangles.Add(bc);
+
+            newTriangles.Add(ab);
+            newTriangles.Add(bc);
+            newTriangles.Add(ca);
         }
 
         triangles.Clear();

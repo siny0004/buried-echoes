@@ -50,7 +50,6 @@ public class DiggingTester : MonoBehaviour
             currentStrategy = shovelStrategy;
             RefreshToolModels();
             RefreshToolUI();
-            Debug.Log("Equipped Shovel");
         }
 
         // Switch to Drill
@@ -59,7 +58,6 @@ public class DiggingTester : MonoBehaviour
             currentStrategy = drillStrategy;
             RefreshToolModels();
             RefreshToolUI();
-            Debug.Log("Equipped Drill");
         }
 
         // Dig using the currently equipped tool.
@@ -117,21 +115,13 @@ public class DiggingTester : MonoBehaviour
         );
 
         if (!Physics.Raycast(ray, out RaycastHit hit, digRange))
-        {
-            Debug.Log("DIG FAILED: Raycast hit nothing.");
             return;
-        }
 
         ChunkSVT hitChunk =
             hit.collider.GetComponentInParent<ChunkSVT>();
 
         if (hitChunk == null)
-        {
-            Debug.Log(
-                $"DIG FAILED: Raycast hit {hit.collider.name} instead of terrain."
-            );
             return;
-        }
 
         Vector3 digPosition =
             hit.point - hit.normal * 0.5f;
@@ -146,8 +136,7 @@ public class DiggingTester : MonoBehaviour
         changedChunks.Clear();
         rebuildChunks.Clear();
 
-        // The hit chunk and its eight horizontal neighbors
-        // are enough for our current 1-metre brush.
+        // Apply digging to the hit chunk and nearby chunks that may intersect the current digging radius.
         TryApplyDig(hitChunk, digPosition);
 
         if (hitChunk.neighborhood != null)
@@ -315,8 +304,6 @@ public class DiggingTester : MonoBehaviour
             Debug.LogWarning("ToolSelectionUI is NOT assigned!");
             return;
         }
-
-        Debug.Log("Refreshing Tool UI");
 
         toolSelectionUI.Refresh(
             currentStrategy == shovelStrategy,
