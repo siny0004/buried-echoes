@@ -1,5 +1,4 @@
-﻿
-using BuriedEchoes.Resources;
+﻿using BuriedEchoes.Resources;
 using UnityEngine;
 
 public class UpgradeStation : MonoBehaviour
@@ -12,38 +11,19 @@ public class UpgradeStation : MonoBehaviour
             return;
 
         if (!toolStats.CanUpgradeShovel)
-        {
-            Debug.Log("Digging strength is already at maximum level!");
             return;
-        }
 
         int cost = toolStats.NextShovelUpgradeCost;
 
         if (wallet.Balance < cost)
-        {
-            Debug.Log(
-                $"Not enough money! Upgrade costs ${cost}. " +
-                $"Current balance: ${wallet.Balance}"
-            );
             return;
-        }
 
         if (!wallet.TrySpend(cost))
             return;
 
-        if (toolStats.TryUpgradeShovel())
+        if (!toolStats.TryUpgradeShovel())
         {
-            Debug.Log(
-                $"Shovel upgraded to level {toolStats.ShovelLevel}! " +
-                $"Radius: {toolStats.DigRadius}, " +
-                $"Strength: {toolStats.DigStrength}, " +
-                $"Cooldown: {toolStats.DigCooldown}s. " +
-                $"Remaining money: ${wallet.Balance}"
-            );
-        }
-        else
-        {
-            // Safety fallback: refund if the upgrade fails.
+            // Refund the player if the upgrade unexpectedly fails.
             wallet.AddMoney(cost);
         }
     }
@@ -56,34 +36,17 @@ public class UpgradeStation : MonoBehaviour
             return;
 
         if (!inventory.CanUpgradeInventory)
-        {
-            Debug.Log("Inventory is already at maximum capacity!");
             return;
-        }
 
         int cost = inventory.NextInventoryUpgradeCost;
 
         if (wallet.Balance < cost)
-        {
-            Debug.Log(
-                $"Not enough money! Inventory upgrade costs ${cost}. " +
-                $"Current balance: ${wallet.Balance}"
-            );
             return;
-        }
 
         if (!wallet.TrySpend(cost))
             return;
 
-        if (inventory.TryUpgradeInventory())
-        {
-            Debug.Log(
-                $"Inventory upgraded to level {inventory.InventoryLevel}! " +
-                $"New capacity: {inventory.Capacity} slots. " +
-                $"Remaining money: ${wallet.Balance}"
-            );
-        }
-        else
+        if (!inventory.TryUpgradeInventory())
         {
             // Refund the player if the upgrade unexpectedly fails.
             wallet.AddMoney(cost);
@@ -98,36 +61,19 @@ public class UpgradeStation : MonoBehaviour
             return;
 
         if (!playerMovement.CanUpgradeRope())
-        {
-            Debug.Log("Rope is already at maximum level!");
             return;
-        }
 
         int cost = playerMovement.GetRopeUpgradeCost();
 
         if (wallet.Balance < cost)
-        {
-            Debug.Log(
-                $"Not enough money! Rope upgrade costs ${cost}. " +
-                $"Current balance: ${wallet.Balance}"
-            );
             return;
-        }
 
         if (!wallet.TrySpend(cost))
             return;
 
-        if (playerMovement.UpgradeRope())
+        if (!playerMovement.UpgradeRope())
         {
-            Debug.Log(
-                $"Rope upgraded to level {playerMovement.RopeLevel}! " +
-                $"New ascent speed: {playerMovement.RopeSpeed} m/s. " +
-                $"Remaining money: ${wallet.Balance}"
-            );
-        }
-        else
-        {
-            // Refund if the upgrade unexpectedly fails.
+            // Refund the player if the upgrade unexpectedly fails.
             wallet.AddMoney(cost);
         }
     }

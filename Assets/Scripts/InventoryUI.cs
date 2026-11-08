@@ -12,6 +12,8 @@ public class InventoryUI : MonoBehaviour
         if (inventoryText == null || inventory == null || wallet == null)
             return;
 
+        int totalItems = inventory.TotalItems;
+
         string capacityColor = inventory.IsFull ? "#FF6666" : "#A0A5AA";
 
         int iron = inventory.GetAmount(ResourceType.Iron);
@@ -29,11 +31,11 @@ public class InventoryUI : MonoBehaviour
         // Always visible.
         string text =
             "<color=#E6C38D><b>INVENTORY</b></color>\n" +
-            $"<color={capacityColor}>Capacity: {inventory.TotalItems} / {inventory.Capacity}</color>\n" +
+            $"<color={capacityColor}>Capacity: {totalItems} / {inventory.Capacity}</color>\n" +
             $"<color=#7EDC87><b>Money: ${wallet.Balance}</b></color>";
 
         // Add the separator only when carrying minerals.
-        if (inventory.TotalItems > 0)
+        if (totalItems > 0)
         {
             text += "\n<color=#666666>────────────</color>";
         }

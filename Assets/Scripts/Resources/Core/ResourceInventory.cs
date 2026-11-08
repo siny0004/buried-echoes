@@ -76,7 +76,13 @@ namespace BuriedEchoes.Resources
             if (currentAmount < amount)
                 return false;
 
-            resources[type] = currentAmount - amount;
+            int remainingAmount = currentAmount - amount;
+
+            if (remainingAmount == 0)
+                resources.Remove(type);
+            else
+                resources[type] = remainingAmount;
+
             return true;
         }
     }

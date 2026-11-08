@@ -152,25 +152,25 @@ MonoBehaviour:
   - resourceType: 3
     prefab: {fileID: 233056886979180564, guid: d4048c8acde2c1e43951920813b759dc, type: 3}
     largePrefab: {fileID: 233056886979180564, guid: c69768bbbe8665249a196fe3d8593297, type: 3}
-    count: 400
-    depthRange: {x: 1, y: 10}
+    count: 500
+    depthRange: {x: 0.5, y: 11}
     largeChunkChance: 20
   - resourceType: 2
     prefab: {fileID: 233056886979180564, guid: e5ba054926eebaf479eb9ac7492f3137, type: 3}
     largePrefab: {fileID: 233056886979180564, guid: 9fd86cafe592c974bbd3542379a77bf9, type: 3}
-    count: 360
-    depthRange: {x: 7, y: 20}
+    count: 460
+    depthRange: {x: 8, y: 20}
     largeChunkChance: 20
   - resourceType: 5
     prefab: {fileID: 233056886979180564, guid: 4576c5c4086938846b24b44ab9e21d19, type: 3}
     largePrefab: {fileID: 233056886979180564, guid: bb4eed13822260441bca9d5662bbc594, type: 3}
-    count: 320
+    count: 430
     depthRange: {x: 17, y: 30}
     largeChunkChance: 20
   - resourceType: 4
     prefab: {fileID: 233056886979180564, guid: d1ffeca45bb322b4facb3b2d6ab1021f, type: 3}
     largePrefab: {fileID: 233056886979180564, guid: aa94e7307c4aa8141ae1520439fdbfe6, type: 3}
-    count: 280
+    count: 400
     depthRange: {x: 27, y: 40}
     largeChunkChance: 20
   areaSize: {x: 60, y: 60}
